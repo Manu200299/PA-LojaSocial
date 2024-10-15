@@ -1,6 +1,6 @@
-﻿Projeto Aplicado – Projeto Loja Social
+﻿# Projeto Aplicado – Projeto Loja Social
 
-# Pontos Importantes
+## Pontos Importantes
 - Loja social que não controla todo o stock 
   - Controla a “olho” os itens mais importantes como cobertores e bens essenciais ou itens mais “raros”
   - Em épocas especiais como o Natal, controlam melhor os brinquedos
@@ -19,20 +19,7 @@
 - Não costumam receber doações monetárias.
 - Utiliza nacionalidades dos beneficiários para estudos
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Funcionalidades possíveis:
+## Funcionalidades possíveis:
 - ***Check-In de cada beneficiário:***
   - Beneficiário já registado:
     - Verifica o beneficiário e o seu agregado familiar.

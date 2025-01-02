@@ -5,7 +5,6 @@ import com.example.lojasocial.domain.use_case.AddBeneficiaryUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 class BeneficiaryRegistrationViewModel(
     private val addBeneficiaryUseCase: AddBeneficiaryUseCase
@@ -14,10 +13,35 @@ class BeneficiaryRegistrationViewModel(
     private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
     val uiState = _uiState.asStateFlow()
 
-    fun registerBeneficiary(nome: String) {
+    fun registerBeneficiary(
+        nome: String,
+        nacionalidade: String,
+        dataNascimento: String,
+        telefone: String,
+        numeroIdentificacao: String,
+        freguesia: String,
+        cidade: String,
+        contadorVisitas: Int,
+        prioridade: String,
+        escola: String,
+        anoEscolar: String
+
+    ) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
-            val result = addBeneficiaryUseCase(nome)
+            val result = addBeneficiaryUseCase(
+                nome,
+                nacionalidade,
+                dataNascimento,
+                telefone,
+                numeroIdentificacao,
+                freguesia,
+                cidade,
+                contadorVisitas,
+                prioridade,
+                escola,
+                anoEscolar
+            )
             _uiState.value = when {
                 result.isSuccess -> UiState.Success
                 else -> UiState.Error(result.exceptionOrNull()?.message ?: "Unknown error occurred")

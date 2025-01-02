@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "608834944013",
+    "firebase_url": "https://loja-social-c2163-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "loja-social-c2163",
+    "storage_bucket": "loja-social-c2163.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:608834944013:android:77475f59e90f3682476944",
+        "android_client_info": {
+          "package_name": "com.example.lojasocial"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCo75izjCvQdQmUWWZqRy7VTuaXyIT7_rw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

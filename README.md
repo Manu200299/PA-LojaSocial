@@ -1,5 +1,12 @@
 ﻿Projeto Aplicado – Projeto Loja Social
 
+
+# Fase de desenvolvimento Kotlin
+
+
+
+
+
 # Pontos Importantes
 - Loja social que não controla todo o stock 
   - Controla a “olho” os itens mais importantes como cobertores e bens essenciais ou itens mais “raros”
@@ -18,19 +25,6 @@
 - Fazer algo para agilizar as filas, pois estas por vezes são longas e demoradas
 - Não costumam receber doações monetárias.
 - Utiliza nacionalidades dos beneficiários para estudos
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 # Funcionalidades possíveis:
 - ***Check-In de cada beneficiário:***

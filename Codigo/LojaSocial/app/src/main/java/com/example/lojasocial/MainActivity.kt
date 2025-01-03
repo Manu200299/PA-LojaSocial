@@ -10,12 +10,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import com.example.lojasocial.presentation.home.HomeScreen
+import com.example.lojasocial.presentation.beneficiary.CheckInBeneficiaryScreen
 import com.example.lojasocial.ui.theme.LojaSocialTheme
-import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
-import com.google.firebase.app
-import com.google.firebase.database.database
 
 
 class MainActivity : ComponentActivity() {
@@ -29,13 +26,15 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     provideDependencies {
-                        HomeScreen(
-                            onNavigateBack = { /* Mock action for back navigation */ },
-                            onMenuItemClick = { menuItem ->
-                                // Mock action for menu item clicks
-                                println("Clicked on menu item: ${menuItem.title}")
-                            }
-                        )
+                        CheckInBeneficiaryScreen()
+//                        BeneficiaryRegistrationScreen()
+//                        HomeScreen(
+//                            onNavigateBack = { /* Mock action for back navigation */ },
+//                            onMenuItemClick = { menuItem ->
+//                                // Mock action for menu item clicks
+//                                println("Clicked on menu item: ${menuItem.title}")
+//                            }
+//                        )
                     }
                 }
             }

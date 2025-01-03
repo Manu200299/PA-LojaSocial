@@ -14,6 +14,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.lojasocial.presentation.beneficiary.CheckInBeneficiaryScreen
+import com.example.lojasocial.presentation.home.ExitApplicationWithConfirmation
 import com.example.lojasocial.presentation.home.HomeScreen
 import com.example.lojasocial.ui.theme.LojaSocialTheme
 import com.google.firebase.FirebaseApp
@@ -58,6 +60,9 @@ fun AppNavHost(navController: androidx.navigation.NavHostController) {
             })
         }
         composable("register") { BeneficiaryRegistrationScreen() }
-
+        composable("check_in") { CheckInBeneficiaryScreen() }
+        composable("exit") {
+            ExitApplicationWithConfirmation(navController)
+        }
     }
 }

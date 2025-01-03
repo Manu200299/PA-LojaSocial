@@ -14,18 +14,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextAlign
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    onNavigateBack: () -> Unit = {},
-    onMenuItemClick: (MenuItem) -> Unit = {}
+    onMenuItemClick: (MenuItem) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -35,18 +31,7 @@ fun HomeScreen(
         // Top Bar
         TopAppBar(
             title = { Text("Home", color = Color.White) },
-            navigationIcon = {
-                IconButton(onClick = onNavigateBack) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Back",
-                        tint = Color.White
-                    )
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color(0xFF3851F1)
-            )
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF3851F1))
         )
 
         // Grid Content
@@ -54,26 +39,17 @@ fun HomeScreen(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            val numberOfColumns = 3
-            val numberOfRows = 3 // Adjust for the number of menu items
-            val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-            val screenHeight = LocalConfiguration.current.screenHeightDp.dp - 64.dp // Adjust for TopAppBar height
-            val itemSpacing = 8.dp
-            val itemWidth = (screenWidth - (itemSpacing * (numberOfColumns + 1))) / numberOfColumns
-            val itemHeight = (screenHeight - (itemSpacing * (numberOfRows + 1))) / numberOfRows
-
             LazyVerticalGrid(
-                columns = GridCells.Fixed(numberOfColumns),
-                contentPadding = PaddingValues(itemSpacing),
-                horizontalArrangement = Arrangement.spacedBy(itemSpacing),
-                verticalArrangement = Arrangement.spacedBy(itemSpacing),
-                modifier = Modifier.fillMaxSize()
+                columns = GridCells.Fixed(3),
+                contentPadding = PaddingValues(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(MenuItem.values()) { menuItem ->
                     MenuCard(
                         menuItem = menuItem,
                         onClick = { onMenuItemClick(menuItem) },
-                        size = itemWidth.coerceAtMost(itemHeight)
+                        size = 100.dp
                     )
                 }
             }
@@ -92,9 +68,7 @@ fun MenuCard(
             .size(size)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFD9D9D9)
-        )
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFD9D9D9))
     ) {
         Column(
             modifier = Modifier
@@ -103,34 +77,13 @@ fun MenuCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Icon(
-                imageVector = menuItem.icon,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = Color(0xFF292D32)
-            )
+            Icon(imageVector = menuItem.icon, contentDescription = null, modifier = Modifier.size(24.dp))
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = menuItem.title,
                 style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
-                color = Color(0xFF000000)
+                textAlign = TextAlign.Center
             )
         }
     }
-}
-
-enum class MenuItem(
-    val title: String,
-    val icon: ImageVector
-) {
-    REGISTER("Registar Beneficiário\nou Família", Icons.Outlined.Person),
-    CHECK_IN("Check-In Beneficiário", Icons.Outlined.CheckCircle),
-    CHECK_OUT("Check-Out Beneficiário", Icons.Outlined.ExitToApp),
-    STOCK("Gestão de Stock", Icons.Outlined.Person),
-    DONATIONS("Receber Doações", Icons.Outlined.Person),
-    VOLUNTEERS("Gestão Voluntários", Icons.Outlined.Person),
-    STATISTICS("Dados Estatísticos", Icons.Outlined.Person),
-    LANGUAGE("Alterar Idioma", Icons.Outlined.Person),
-    EXIT("Sair", Icons.Outlined.Close)
 }

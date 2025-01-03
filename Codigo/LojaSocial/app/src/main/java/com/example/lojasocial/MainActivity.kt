@@ -10,42 +10,54 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.lojasocial.presentation.home.HomeScreen
 import com.example.lojasocial.ui.theme.LojaSocialTheme
-import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
-import com.google.firebase.app
-import com.google.firebase.database.database
-
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        FirebaseApp.initializeApp(this)
+        FirebaseApp.initializeApp(this) // Initialize Firebase
         setContent {
-            LojaSocialTheme() {
+            LojaSocialTheme {
+                val navController = rememberNavController() // Initialize NavController
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     provideDependencies {
-                        HomeScreen(
-                            onNavigateBack = { /* Mock action for back navigation */ },
-                            onMenuItemClick = { menuItem ->
-                                // Mock action for menu item clicks
-                                println("Clicked on menu item: ${menuItem.title}")
-                            }
-                        )
+                        AppNavHost(navController = navController) // Pass NavController
                     }
                 }
             }
         }
     }
+
     @Composable
     private fun provideDependencies(content: @Composable () -> Unit) {
         val dependencies = (applicationContext as LojaSocialApplication).dependencies
         CompositionLocalProvider(LocalAppDependencies provides dependencies) {
             content()
         }
+    }
+}
+
+@Composable
+fun AppNavHost(navController: androidx.navigation.NavHostController) {
+    NavHost(
+        navController = navController,
+        startDestination = "home"
+    ) {
+        composable("home") {
+            HomeScreen(onMenuItemClick = { menuItem ->
+                navController.navigate(menuItem.route) // Navigate using the route
+            })
+        }
+        composable("register") { BeneficiaryRegistrationScreen() }
+
     }
 }

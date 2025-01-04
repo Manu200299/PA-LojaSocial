@@ -21,9 +21,12 @@ class VolunteerViewModel(
      * Registra um voluntário com os dados fornecidos.
      */
     fun registerVolunteer(
+        nome: String,
         email: String,
+        telefone: String,
         senha: String,
-        confirmarSenha: String
+        confirmarSenha: String,
+        dataNascimento: String
     ) {
         if (senha != confirmarSenha) {
             _uiState.value = UiState.Error("As senhas não coincidem.")
@@ -32,7 +35,7 @@ class VolunteerViewModel(
 
         viewModelScope.launch {
             _uiState.value = UiState.Loading
-            val result = registerUseCase(email, senha)
+            val result = registerUseCase(nome, email, telefone, senha, dataNascimento)
             _uiState.value = if (result.isSuccess) UiState.Success else UiState.Error(
                 result.exceptionOrNull()?.message ?: "Erro desconhecido."
             )

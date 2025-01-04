@@ -3,6 +3,7 @@ package com.example.lojasocial.presentation.volunteers
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -16,13 +17,22 @@ import com.example.lojasocial.LocalAppDependencies
 @Composable
 fun RegisterVolunteerScreen(
     viewModel: VolunteerViewModel = viewModel(
-        factory = VolunteerViewModel.Factory(LocalAppDependencies.current.addVolunteerUseCase)
+        factory = VolunteerViewModel.Factory(
+            registerUseCase = LocalAppDependencies.current.registerVolunteerUseCase,
+            loginUseCase = LocalAppDependencies.current.loginVolunteerUseCase
+        )
     ),
     onNavigateBack: () -> Unit = {}
 ) {
+    // Campos para armazenar os valores inseridos pelo usuário
+    var nome by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+    var telefone by remember { mutableStateOf("") }
+    var dataNascimento by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+
+    // Obter o estado atual da UI
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
@@ -34,7 +44,7 @@ fun RegisterVolunteerScreen(
                         Icon(Icons.Default.ArrowBack, contentDescription = "Voltar")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors()
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
             )
         }
     ) { padding ->
@@ -45,6 +55,15 @@ fun RegisterVolunteerScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Campo Nome
+            OutlinedTextField(
+                value = nome,
+                onValueChange = { nome = it },
+                label = { Text("Nome Completo") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Campo Email
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
@@ -52,6 +71,26 @@ fun RegisterVolunteerScreen(
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
             )
+
+            // Campo Telefone
+            OutlinedTextField(
+                value = telefone,
+                onValueChange = { telefone = it },
+                label = { Text("Telefone") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+            )
+
+            // Campo Data de Nascimento
+            OutlinedTextField(
+                value = dataNascimento,
+                onValueChange = { dataNascimento = it },
+                label = { Text("Data de Nascimento") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+
+            // Campo Senha
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
@@ -60,6 +99,8 @@ fun RegisterVolunteerScreen(
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )
+
+            // Campo Confirmar Senha
             OutlinedTextField(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it },
@@ -68,9 +109,18 @@ fun RegisterVolunteerScreen(
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )
+
+            // Botão Registrar
             Button(
                 onClick = {
-                    viewModel.registerVolunteer(email.trim(), password.trim(), confirmPassword.trim())
+                    viewModel.registerVolunteer(
+                        nome.trim(),
+                        email.trim(),
+                        telefone.trim(),
+                        password.trim(),
+                        confirmPassword.trim(),
+                        dataNascimento.trim()
+                    )
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = uiState !is VolunteerViewModel.UiState.Loading
@@ -78,6 +128,7 @@ fun RegisterVolunteerScreen(
                 Text("Registrar")
             }
 
+            // Estado da UI
             when (uiState) {
                 is VolunteerViewModel.UiState.Success -> {
                     Text("Registro bem-sucedido!", color = MaterialTheme.colorScheme.primary)

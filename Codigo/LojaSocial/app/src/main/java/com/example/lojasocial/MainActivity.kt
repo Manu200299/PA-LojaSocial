@@ -11,6 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -22,6 +24,8 @@ import com.example.lojasocial.presentation.home.ExitApplicationWithConfirmation
 import com.example.lojasocial.presentation.home.HomeScreen
 import com.example.lojasocial.presentation.language.LanguageScreen
 import com.example.lojasocial.presentation.statistics.StatisticsDataScreen
+import com.example.lojasocial.presentation.volunteers.LoginVolunteerScreen
+import com.example.lojasocial.presentation.volunteers.RegisterVolunteerScreen
 import com.example.lojasocial.presentation.volunteers.VolunteersScreen
 import com.example.lojasocial.ui.theme.LojaSocialTheme
 import com.google.firebase.FirebaseApp
@@ -73,6 +77,8 @@ fun AppNavHost(navController: androidx.navigation.NavHostController) {
         composable("volunteers") { VolunteersScreen() }
         composable("statistics") { StatisticsDataScreen() }
         composable("language") { LanguageScreen() }
+        composable("volunteer_register") { RegisterVolunteerScreen() }
+        composable("volunteer_login") { LoginVolunteerScreen() }
         composable("exit") {
             ExitApplicationWithConfirmation(navController)
         }

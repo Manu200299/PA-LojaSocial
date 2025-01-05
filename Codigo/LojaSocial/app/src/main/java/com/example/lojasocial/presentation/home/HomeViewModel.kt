@@ -8,5 +8,7 @@ sealed class Screen(val route: String) {
     object Volunteers : Screen("volunteers")
     object Statistics : Screen("statistics")
     object Language : Screen("language")
+    object LoginVolunteer : Screen("LoginVolunteer")
+    object RegisterVolunteer : Screen("RegisterVolunteer")
     object Exit : Screen("exit")
 }

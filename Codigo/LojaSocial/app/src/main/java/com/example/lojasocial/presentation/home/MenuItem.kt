@@ -17,5 +17,7 @@ enum class MenuItem(
     VOLUNTEERS("Gestão Voluntários", Icons.Outlined.Person, "volunteers"),
     STATISTICS("Dados Estatísticos", Icons.Outlined.Person, "statistics"),
     LANGUAGE("Alterar Idioma", Icons.Outlined.Person, "language"),
+    LOGIN_VOLUNTEER("Login Voluntário", Icons.Outlined.Person, "volunteer_login"), //
+    REGISTER_VOLUNTEER("Registrar Voluntário", Icons.Outlined.Person, "volunteer_register"),
     EXIT("Sair", Icons.Outlined.Close, "exit")
 }

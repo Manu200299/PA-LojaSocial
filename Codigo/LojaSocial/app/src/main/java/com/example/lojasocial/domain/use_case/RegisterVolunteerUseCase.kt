@@ -1,5 +1,6 @@
 package com.example.lojasocial.domain.use_case
 
+import android.R.attr.password
 import com.example.lojasocial.data.model.Volunteer
 import com.example.lojasocial.domain.repository.VolunteerRepository
 
@@ -10,14 +11,14 @@ class RegisterVolunteerUseCase(
         nome: String,
         email: String,
         telefone: String,
-        senha: String,
+        password: String,
         dataNascimento: String
     ): Result<Unit> {
         val volunteer = Volunteer(
             nome = nome,
             email = email,
-            telefone = telefone,
-            senha = senha,
+            Telefone = telefone,
+            password = password,
             dataNascimento = dataNascimento
         )
         return repository.registerVolunteer(volunteer)

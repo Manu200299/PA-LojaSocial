@@ -15,7 +15,7 @@ class FirebaseVolunteerApi(
     suspend fun registerVolunteer(volunteer: Volunteer): Result<Unit> {
         return try {
             // Registra no Firebase Authentication
-            val result = auth.createUserWithEmailAndPassword(volunteer.email, volunteer.senha).await()
+            val result = auth.createUserWithEmailAndPassword(volunteer.email, volunteer.password).await()
             val userId = result.user?.uid ?: throw Exception("Erro ao criar conta")
 
             // Adiciona no Realtime Database

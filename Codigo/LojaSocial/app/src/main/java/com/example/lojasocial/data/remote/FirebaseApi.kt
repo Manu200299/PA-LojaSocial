@@ -1,6 +1,8 @@
 package com.example.lojasocial.data.remote
 
 import com.example.lojasocial.data.model.Beneficiary
+import com.example.lojasocial.data.model.Volunteer
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -11,10 +13,36 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 // Calls para a API da Firebase
-class FirebaseApi(private val database: FirebaseDatabase) {
+class FirebaseApi(
+    private val auth: FirebaseAuth,
+    private val database: FirebaseDatabase){
 
     // Nome da table beneficiarios no firebase
     private val beneficiariesRef = database.getReference("Beneficiarios")
+    private val volunteersRef = database.getReference("Voluntarios")
+
+    suspend fun registerVolunteer(volunteer: Volunteer): Result<Unit> {
+        return try {
+            // Registar no Firebase Authentication
+            val result = auth.createUserWithEmailAndPassword(volunteer.email, volunteer.password).await()
+            val userId = result.user?.uid ?: throw Exception("User ID não encontrado")
+
+            // Guardar detalhes do voluntário no Realtime Database
+            volunteersRef.child(userId).setValue(volunteer.copy(password = "")).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun loginVolunteer(email: String, password: String): Result<Unit> {
+        return try {
+            auth.signInWithEmailAndPassword(email, password).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
     // Funcao para adicionar beneficiarios
     suspend fun addBeneficiary(beneficiary: Beneficiary): Result<Unit> {

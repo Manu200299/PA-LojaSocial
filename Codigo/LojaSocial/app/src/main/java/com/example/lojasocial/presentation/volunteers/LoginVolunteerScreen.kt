@@ -3,6 +3,8 @@ package com.example.lojasocial.presentation.volunteers
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,7 +32,7 @@ fun LoginVolunteerScreen(
     val uiState by volunteerViewModel.uiState.collectAsState()
 
     var email by remember { mutableStateOf("") }
-    var senha by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -65,22 +67,30 @@ fun LoginVolunteerScreen(
             )
 
             OutlinedTextField(
-                value = senha,
-                onValueChange = { senha = it },
+                value = password,
+                onValueChange = { password = it },
                 label = { Text("Senha") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
-                    val icon = if (showPassword) Icons.Default.ArrowBack else Icons.Default.ArrowBack
                     IconButton(onClick = { showPassword = !showPassword }) {
-                        Icon(imageVector = icon, contentDescription = "Mostrar/Esconder senha")
+                        Icon(
+                            imageVector = if (showPassword) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                            contentDescription = "Mostrar/Esconder senha"
+                        )
                     }
                 }
             )
 
             Button(
-                onClick = { volunteerViewModel.loginVolunteer(email, senha) },
+                onClick = {
+                    if (email.isBlank() || password.isBlank()) {
+                        volunteerViewModel.setUiStateError("Por favor, preencha todos os campos.")
+                    } else {
+                        volunteerViewModel.loginVolunteer(email.trim(), password.trim())
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = uiState !is VolunteerViewModel.UiState.Loading,
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3851F1))
@@ -98,7 +108,10 @@ fun LoginVolunteerScreen(
                     }
                 }
                 is VolunteerViewModel.UiState.Error -> {
-                    Text("Erro ao fazer login. Verifique suas credenciais.", color = Color.Red)
+                    Text(
+                        text = (uiState as VolunteerViewModel.UiState.Error).message,
+                        color = Color.Red
+                    )
                 }
                 else -> {}
             }

@@ -14,14 +14,17 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 
 class AppDependencies {
-    private val firebaseDatabase: FirebaseDatabase by lazy { FirebaseDatabase.getInstance() }
-    private val firebaseApi: FirebaseApi by lazy { FirebaseApi(firebaseDatabase) }
 
+    // Firebase inicializações
     private val firebaseAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
+    private val firebaseDatabase: FirebaseDatabase by lazy { FirebaseDatabase.getInstance() }
+
+    // API remota
+    private val firebaseApi: FirebaseApi by lazy { FirebaseApi(auth = firebaseAuth, database = firebaseDatabase) }
 
     // Repositórios
     private val beneficiaryRepository: BeneficiaryRepository by lazy { BeneficiaryRepositoryImpl(firebaseApi) }
-    private val volunteerRepository: VolunteerRepository by lazy { VolunteerRepositoryImpl(firebaseAuth) }
+    private val volunteerRepository: VolunteerRepository by lazy { VolunteerRepositoryImpl(firebaseApi) }
 
     // Casos de uso
     val addBeneficiaryUseCase: AddBeneficiaryUseCase by lazy { AddBeneficiaryUseCase(beneficiaryRepository) }
@@ -30,4 +33,5 @@ class AppDependencies {
     val registerVolunteerUseCase: RegisterVolunteerUseCase by lazy { RegisterVolunteerUseCase(volunteerRepository) }
 }
 
+// Provedor de dependências no escopo da composição
 val LocalAppDependencies = compositionLocalOf<AppDependencies> { error("AppDependencies not provided") }

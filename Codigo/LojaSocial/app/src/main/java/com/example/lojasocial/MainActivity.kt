@@ -60,6 +60,10 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppNavHost(navController: androidx.navigation.NavHostController) {
+
+    val navController = rememberNavController()
+
+
     NavHost(
         navController = navController,
         startDestination = "home"

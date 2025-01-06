@@ -19,7 +19,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.lojasocial.presentation.Stock.StockManagementScreen
 import com.example.lojasocial.presentation.beneficiary.CheckInBeneficiaryScreen
 import com.example.lojasocial.presentation.beneficiary.CheckOutBeneficiaryScreen
+import com.example.lojasocial.presentation.donations.NewDonationScreen
 import com.example.lojasocial.presentation.donations.ReceivingDonationsScreen
+import com.example.lojasocial.presentation.donations.VerifyDonationsScreen
 import com.example.lojasocial.presentation.home.ExitApplicationWithConfirmation
 import com.example.lojasocial.presentation.home.HomeScreen
 import com.example.lojasocial.presentation.language.LanguageScreen
@@ -58,12 +60,9 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
 @Composable
-fun AppNavHost(navController: androidx.navigation.NavHostController) {
-
-    val navController = rememberNavController()
-
-
+fun AppNavHost(navController: NavHostController) {
     NavHost(
         navController = navController,
         startDestination = "home"
@@ -77,7 +76,25 @@ fun AppNavHost(navController: androidx.navigation.NavHostController) {
         composable("check_in") { CheckInBeneficiaryScreen() }
         composable("check_out") { CheckOutBeneficiaryScreen() }
         composable("stock") { StockManagementScreen() }
-        composable("donations") { ReceivingDonationsScreen() }
+        composable("donations") {
+            ReceivingDonationsScreen(navController = navController)
+        }
+        composable("new_donation") {
+            NewDonationScreen (
+                onNavigateBack = { navController.popBackStack() },
+                onAddItem = { donationItem ->
+                    println("New donation added: $donationItem")
+                    navController.popBackStack() // Return to ReceivingDonationsScreen
+                }
+            )
+        }
+        composable("verify_donations") {
+            VerifyDonationsScreen(
+                onNavigateBack ={navController.popBackStack() },
+                donations = TODO()
+            )
+        }
+
         composable("volunteers") { VolunteersScreen() }
         composable("statistics") { StatisticsDataScreen() }
         composable("language") { LanguageScreen() }
@@ -88,3 +105,4 @@ fun AppNavHost(navController: androidx.navigation.NavHostController) {
         }
     }
 }
+

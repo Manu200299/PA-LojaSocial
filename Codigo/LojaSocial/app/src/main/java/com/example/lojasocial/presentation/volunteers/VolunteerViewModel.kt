@@ -38,12 +38,16 @@ class VolunteerViewModel(
             _uiState.value = UiState.Loading
             try {
                 val result = registerUseCase(addVolunteer)
-                if (result.isSuccess) {
-                    _uiState.value = UiState.Success
-                    Log.d("VolunteerRegistrationViewModel", "Registered volunteer: $addVolunteer")
-                } else {
-                    _uiState.value = UiState.Error(result.exceptionOrNull()?.message ?: "Unknown error")
-                }
+                result.fold(
+                    onSuccess = { newVolunteer ->
+                        _uiState.value = UiState.Success
+                        Log.d("VolunteerRegistrationViewModel", "Registered volunteer: $newVolunteer")
+                    },
+                    onFailure = { error ->
+                        _uiState.value = UiState.Error(error.message ?: "Unkown error")
+                        Log.e("VolunteerRegistrationViewModel", "Error registering volunteer! | ${error.message}")
+                    }
+                )
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Unknown error")
                 Log.e("VolunteerRegistrationViewModel", "Error registering volunteer! | ${e.message}")

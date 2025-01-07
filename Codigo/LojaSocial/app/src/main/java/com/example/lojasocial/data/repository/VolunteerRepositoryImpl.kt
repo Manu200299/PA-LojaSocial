@@ -13,12 +13,11 @@ class VolunteerRepositoryImpl(
 ) : VolunteerRepository {
 
     // Funcao para registar voluntario
-    override suspend fun registerVolunteer(volunteer: Volunteer): Result<Unit> {
+    override suspend fun registerVolunteer(volunteer: Volunteer): Result<Volunteer> {
         return try {
             val result = api.registerVolunteer(volunteer.toVolunteerDto())
             result.map { newVolunteerId ->
-                volunteer.volunteerId = newVolunteerId
-                Unit
+                newVolunteerId.toVolunteer()
             }
         } catch (e: Exception) {
             Result.failure(Exception("VolunteerRepositoryImpl | Error: $e"))

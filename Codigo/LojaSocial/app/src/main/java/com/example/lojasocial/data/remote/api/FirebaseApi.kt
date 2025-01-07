@@ -59,7 +59,7 @@ class FirebaseApi(
 
 
     // Funcao para registar voluntarios na firebase
-    suspend fun registerVolunteer(volunteerDto: VolunteerDto): Result<String> {
+    suspend fun registerVolunteer(volunteerDto: VolunteerDto): Result<VolunteerDto> {
         return try {
             val existingVolunteer = volunteersRef.orderByChild("telefone").equalTo(volunteerDto.telefone).get().await()
             if (existingVolunteer.exists()) {
@@ -71,7 +71,7 @@ class FirebaseApi(
             volunteerDto.volunteerId = newVolunteerId // Set the generated ID
             volunteersRef.child(newVolunteerId).setValue(volunteerDto).await()
 
-            Result.success(newVolunteerId)
+            Result.success(volunteerDto)
         } catch (e: Exception) {
             Result.failure(e)
         }

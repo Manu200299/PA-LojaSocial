@@ -13,7 +13,7 @@ class VolunteerLoginUseCase(private val repository: VolunteerRepository) {
 }
 
 class VolunteerRegisterUseCase(private val repository: VolunteerRepository) {
-    suspend operator fun invoke(volunteer: Volunteer): Result<Unit> {
+    suspend operator fun invoke(volunteer: Volunteer): Result<Volunteer> {
         Log.d("VolunteerUseCase", "Registering volunteer...: $volunteer")
         return repository.registerVolunteer(volunteer)
     }

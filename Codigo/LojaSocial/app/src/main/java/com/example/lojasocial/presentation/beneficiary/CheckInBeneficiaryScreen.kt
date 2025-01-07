@@ -3,6 +3,7 @@ package com.example.lojasocial.presentation.beneficiary
 import android.app.appsearch.SearchResult
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -31,7 +32,7 @@ fun CheckInBeneficiaryScreen(
         factory = BeneficiaryViewModel.Factory(sessionManager)
     ),
     onNavigateBack: () -> Unit = {},
-    onBeneficiarySelected: (Beneficiary) -> Unit = {},
+    onBeneficiarySelected: (Beneficiary) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val searchResults by viewModel.searchResults.collectAsState()
@@ -227,9 +228,9 @@ fun BeneficiaryCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 8.dp)
+            .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        onClick = onClick
     ) {
         Column(
             modifier = Modifier

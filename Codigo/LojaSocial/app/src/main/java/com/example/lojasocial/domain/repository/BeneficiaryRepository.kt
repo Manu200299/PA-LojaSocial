@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 interface  BeneficiaryRepository {
     suspend fun addBeneficiary(addBeneficiary: Beneficiary): Result<Unit>
     suspend fun getBeneficiaries(): Flow<List<Beneficiary>>
+    suspend fun getBeneficiaryById(beneficiaryId: String): Beneficiary?
     suspend fun searchByPhoneNumber(number: String): Flow<List<Beneficiary>>
     suspend fun searchByIdNumber(id: String): Flow<List<Beneficiary>>
 }

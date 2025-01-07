@@ -1,14 +1,11 @@
 package com.example.lojasocial.data.remote.api
 
+import android.util.Log
 import com.example.lojasocial.data.remote.model.BeneficiaryDto
 import com.example.lojasocial.data.remote.model.StockItemDto
 import com.example.lojasocial.data.remote.model.VolunteerDto
 import com.example.lojasocial.data.remote.model.VolunteerLoginDto
-import com.example.lojasocial.domain.model.VolunteerLogin
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.PhoneAuthCredential
-import com.google.firebase.auth.PhoneAuthOptions
-import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -57,6 +54,17 @@ class FirebaseApi(
 
         awaitClose {
             beneficiariesRef.removeEventListener(listener)
+        }
+    }
+
+    // Funcao para extrair um beneficiario atraves do seu ID
+    suspend fun getBeneficiaryById(beneficiaryId: String): BeneficiaryDto?{
+        return try{
+            val snapshot = beneficiariesRef.child(beneficiaryId).get().await()
+            snapshot.getValue(BeneficiaryDto::class.java)
+        } catch (e: Exception){
+            Log.e("FirebaseApi", "Error getting beneficairy by ID: ${e.message}")
+            null
         }
     }
 

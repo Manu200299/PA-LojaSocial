@@ -11,10 +11,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.lojasocial.data.local.SessionManager
+import com.example.lojasocial.presentation.beneficiary.BeneficiaryProfileScreen
 import com.example.lojasocial.presentation.beneficiary.CheckInBeneficiaryScreen
 import com.example.lojasocial.presentation.beneficiary.CheckOutBeneficiaryScreen
 import com.example.lojasocial.presentation.donations.NewDonationScreen
@@ -80,7 +83,24 @@ class MainActivity : ComponentActivity() {
 
                     // CHECK-IN BENEFICIÁRIO
                     composable("check_in") {
-                        CheckInBeneficiaryScreen(sessionManager = sessionManager)
+                        CheckInBeneficiaryScreen(sessionManager = sessionManager,
+                            onBeneficiarySelected = { beneficiary ->
+                                navController.navigate("beneficiary_profile/${beneficiary.id}")
+                            },
+                            onNavigateBack = {
+                                navController.popBackStack()
+                            }
+                        )
+                    }
+
+                    // CHECK-IN BENEFICIARIO
+                    composable("beneficiary_profile/{beneficiaryId}", arguments = listOf(navArgument("beneficiaryId") { type = NavType.StringType})
+                    ){ backStackEntry ->
+                        val beneficiaryId = backStackEntry.arguments?.getString("beneficiaryId")
+                        BeneficiaryProfileScreen(
+                            beneficiaryId = beneficiaryId ?: "",
+                            sessionManager = sessionManager
+                        )
                     }
 
                     // CHECK-OUT BENEFICIÁRIO

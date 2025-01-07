@@ -1,6 +1,7 @@
 package com.example.lojasocial.presentation.beneficiary
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -8,8 +9,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -33,7 +39,7 @@ fun BeneficiaryProfileScreen(
         factory = BeneficiaryViewModel.Factory(sessionManager)
     ),
     onNavigateBack: () -> Unit = {},
-    onEditClick: () -> Unit = {},
+    onEditClick: (Beneficiary) -> Unit = {},
     onStartVisitClick: (Beneficiary) -> Unit = {},
 ) {
 
@@ -50,7 +56,13 @@ fun BeneficiaryProfileScreen(
             .background(Color.White)
     ) {
         TopAppBar(
-            title = { Text("Perfil do Beneficiario", color = Color.White)},
+            title = {
+                Text(
+                    "Perfil do Beneficiario",
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleLarge
+                )
+            },
             navigationIcon = {
                 IconButton(onClick = onNavigateBack) {
                     Icon(
@@ -65,7 +77,7 @@ fun BeneficiaryProfileScreen(
             )
         )
 
-        when(uiState){
+        when (uiState) {
             is BeneficiaryViewModel.UiState.Loading -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -74,6 +86,7 @@ fun BeneficiaryProfileScreen(
                     CircularProgressIndicator(color = Color(0xFF3851F1))
                 }
             }
+
             is BeneficiaryViewModel.UiState.Success -> {
                 beneficiary?.let { beneficiaryData ->
                     Column(
@@ -83,7 +96,178 @@ fun BeneficiaryProfileScreen(
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        BeneficiaryInfoCard(beneficiaryData)
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .border(
+                                    width = 1.dp,
+                                    color = Color(0xFF3851F1),
+                                    shape = RoundedCornerShape(16.dp)
+                                ),
+                            colors = CardDefaults.cardColors(containerColor = Color.White)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .fillMaxWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(80.dp)
+                                                .background(
+                                                    color = Color(0xFFEADDFF),
+                                                    shape = CircleShape
+                                                ),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Person,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(40.dp),
+                                                tint = Color(0xFF4F378A)
+                                            )
+                                        }
+                                        Column {
+                                            Text(
+                                                text = beneficiaryData.nome,
+                                                style = MaterialTheme.typography.titleLarge,
+                                                color = Color.Black
+                                            )
+
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.CalendarToday,
+                                                    contentDescription = null,
+                                                    tint = Color.Black,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                                Text(
+                                                    text = "Visitas: ${beneficiaryData.contadorVisitas}",
+                                                    style = MaterialTheme.typography.bodyLarge
+                                                )
+                                            }
+
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Star,
+                                                    contentDescription = null,
+                                                    tint = Color(0xFFFFC300),
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                                Text(
+                                                    text = "Prioridade: (${beneficiaryData.prioridade})",
+                                                    style = MaterialTheme.typography.bodyLarge,
+                                                    color = Color(0xFFFFC300)
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    Button(
+                                        onClick = { onEditClick(beneficiaryData) },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = Color(0xFF3851F1)
+                                        ),
+                                        shape = RoundedCornerShape(24.dp)
+                                    ) {
+                                        Text("Editar Perfil")
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(24.dp))
+
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Tag,
+                                            contentDescription = null,
+                                            tint = Color.Black
+                                        )
+                                        Text(
+                                            text = "Nº ID / Passaporte: ${beneficiaryData.numeroIdentificacao}",
+                                            style = MaterialTheme.typography.bodyLarge
+                                        )
+                                    }
+
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Phone,
+                                            contentDescription = null,
+                                            tint = Color.Black
+                                        )
+                                        Text(
+                                            text = "Número Telefone: ${beneficiaryData.telefone}",
+                                            style = MaterialTheme.typography.bodyLarge
+                                        )
+                                    }
+
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.People,
+                                            contentDescription = null,
+                                            tint = Color.Black
+                                        )
+                                        Text(
+                                            // text = "Agregado Familiar: ${beneficiaryData.agregadoFamiliar}",
+                                            text = "Agregado Familiar: POR IMPLEMENTAR",
+                                            style = MaterialTheme.typography.bodyLarge
+                                        )
+                                    }
+
+                                    Column(
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Text(
+                                            text = "Descrição Família:",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            modifier = Modifier.padding(bottom = 8.dp)
+                                        )
+                                        TextField(
+                                            // value = beneficiaryData.descricaoFamilia ?: "",
+                                            value = "POR IMPLEMENTAR",
+                                            onValueChange = { },
+                                            readOnly = true,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(100.dp),
+                                            colors = TextFieldDefaults.colors(
+                                                unfocusedContainerColor = Color(0xFFD9D9D9),
+                                                focusedContainerColor = Color(0xFFD9D9D9),
+                                                disabledContainerColor = Color(0xFFD9D9D9),
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.weight(1f))
 
                         Button(
                             onClick = { onStartVisitClick(beneficiaryData) },
@@ -93,13 +277,19 @@ fun BeneficiaryProfileScreen(
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(0xFF3851F1)
                             ),
-                        shape = RoundedCornerShape(28.dp)
+                            shape = RoundedCornerShape(28.dp)
                         ) {
-                            Text("Iniciar Visita", style = MaterialTheme.typography.titleLarge)
+                            Text(
+                                "Iniciar Visita",
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    color = Color.White
+                                )
+                            )
                         }
                     }
                 }
             }
+
             is BeneficiaryViewModel.UiState.Error -> {
                 Text(
                     "Erro: ${(uiState as BeneficiaryViewModel.UiState.Error).message}",
@@ -108,66 +298,100 @@ fun BeneficiaryProfileScreen(
                     modifier = Modifier.padding(16.dp)
                 )
             }
-            else -> {
 
+            else -> {
+                // Idle state
             }
         }
     }
 }
-
-@Composable
-fun BeneficiaryInfoCard(beneficiary: Beneficiary){
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth()
-        ) {
-            Text(
-                text = beneficiary.nome,
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            BeneficiaryInfoItem("ID", beneficiary.id)
-            BeneficiaryInfoItem("Telefone", beneficiary.telefone)
-            BeneficiaryInfoItem("Nº Identificação", beneficiary.numeroIdentificacao)
-            BeneficiaryInfoItem("Nacionalidade", beneficiary.nacionalidade)
-            BeneficiaryInfoItem("Data de Nascimento", beneficiary.dataNascimento)
-            BeneficiaryInfoItem("Freguesia", beneficiary.freguesia)
-            BeneficiaryInfoItem("Cidade", beneficiary.cidade)
-            BeneficiaryInfoItem("Prioridade", beneficiary.prioridade)
-            BeneficiaryInfoItem("Escola", beneficiary.escola)
-            BeneficiaryInfoItem("Ano Escolar", beneficiary.anoEscolar)
-            BeneficiaryInfoItem("Número de Visitas", beneficiary.contadorVisitas.toString())
-        }
-    }
-}
-
-@Composable
-fun BeneficiaryInfoItem(label: String, value: String){
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ){
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            color = Color.Gray
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyLarge
-        )
-    }
-}
+//                            }
+//                        }
+//                        BeneficiaryInfoCard(beneficiaryData)
+//
+//                        Button(
+//                            onClick = { onStartVisitClick(beneficiaryData) },
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .height(56.dp),
+//                            colors = ButtonDefaults.buttonColors(
+//                                containerColor = Color(0xFF3851F1)
+//                            ),
+//                        shape = RoundedCornerShape(28.dp)
+//                        ) {
+//                            Text("Iniciar Visita", style = MaterialTheme.typography.titleLarge)
+//                        }
+//                    }
+//                }
+//            }
+//            is BeneficiaryViewModel.UiState.Error -> {
+//                Text(
+//                    "Erro: ${(uiState as BeneficiaryViewModel.UiState.Error).message}",
+//                    style = MaterialTheme.typography.titleMedium,
+//                    color = Color(0xFFF44336),
+//                    modifier = Modifier.padding(16.dp)
+//                )
+//            }
+//            else -> {
+//
+//            }
+//        }
+//    }
+//}
+//
+//@Composable
+//fun BeneficiaryInfoCard(beneficiary: Beneficiary){
+//    Card(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(vertical = 8.dp),
+//        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+//        colors = CardDefaults.cardColors(containerColor = Color.White)
+//    ) {
+//        Column(
+//            modifier = Modifier
+//                .padding(16.dp)
+//                .fillMaxWidth()
+//        ) {
+//            Text(
+//                text = beneficiary.nome,
+//                style = MaterialTheme.typography.headlineMedium
+//            )
+//            Spacer(modifier = Modifier.height(16.dp))
+//            BeneficiaryInfoItem("ID", beneficiary.id)
+//            BeneficiaryInfoItem("Telefone", beneficiary.telefone)
+//            BeneficiaryInfoItem("Nº Identificação", beneficiary.numeroIdentificacao)
+//            BeneficiaryInfoItem("Nacionalidade", beneficiary.nacionalidade)
+//            BeneficiaryInfoItem("Data de Nascimento", beneficiary.dataNascimento)
+//            BeneficiaryInfoItem("Freguesia", beneficiary.freguesia)
+//            BeneficiaryInfoItem("Cidade", beneficiary.cidade)
+//            BeneficiaryInfoItem("Prioridade", beneficiary.prioridade)
+//            BeneficiaryInfoItem("Escola", beneficiary.escola)
+//            BeneficiaryInfoItem("Ano Escolar", beneficiary.anoEscolar)
+//            BeneficiaryInfoItem("Número de Visitas", beneficiary.contadorVisitas.toString())
+//        }
+//    }
+//}
+//
+//@Composable
+//fun BeneficiaryInfoItem(label: String, value: String){
+//    Row(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(vertical = 4.dp),
+//        horizontalArrangement = Arrangement.SpaceBetween
+//    ){
+//        Text(
+//            text = label,
+//            style = MaterialTheme.typography.bodyLarge,
+//            color = Color.Gray
+//        )
+//        Text(
+//            text = value,
+//            style = MaterialTheme.typography.bodyLarge
+//        )
+//    }
+//}
 
 //    Column(
 //        modifier = Modifier

@@ -12,24 +12,24 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.lojasocial.LocalAppDependencies
+import com.example.lojasocial.data.local.SessionManager
+import com.example.lojasocial.domain.model.Volunteer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterVolunteerScreen(
-    viewModel: VolunteerViewModel = viewModel(
-        factory = VolunteerViewModel.Factory(
-            registerUseCase = LocalAppDependencies.current.registerVolunteerUseCase,
-            loginUseCase = LocalAppDependencies.current.loginVolunteerUseCase
-        )
-    ),
+    onBackToLogin: () -> Unit,
     onNavigateBack: () -> Unit = {},
-    onRegisterSuccess: () -> Unit = {}
+    onRegisterSuccess: () -> Unit = {},
+    sessionManager: SessionManager
 ) {
+    val viewModel: VolunteerViewModel = viewModel(
+        factory = VolunteerViewModel.Factory(sessionManager)
+    )
+
+    var volunteerId by remember { mutableStateOf("") }
     var nome by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
     var telefone by remember { mutableStateOf("") }
-    var dataNascimento by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     val uiState by viewModel.uiState.collectAsState()
@@ -61,25 +61,11 @@ fun RegisterVolunteerScreen(
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-            )
-            OutlinedTextField(
                 value = telefone,
                 onValueChange = { telefone = it },
                 label = { Text("Telefone") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
-            )
-            OutlinedTextField(
-                value = dataNascimento,
-                onValueChange = { dataNascimento = it },
-                label = { Text("Data de Nascimento") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
             OutlinedTextField(
                 value = password,
@@ -99,14 +85,12 @@ fun RegisterVolunteerScreen(
             )
             Button(
                 onClick = {
-                    viewModel.registerVolunteer(
-                        nome.trim(),
-                        email.trim(),
-                        telefone.trim(),
-                        password.trim(),
-                        confirmPassword.trim(),
-                        dataNascimento.trim()
+                    val addVolunteer = Volunteer(
+                        nome = nome,
+                        telefone = telefone,
+                        password = password,
                     )
+                    viewModel.registerVolunteer(addVolunteer)
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = uiState !is VolunteerViewModel.UiState.Loading,
@@ -114,6 +98,15 @@ fun RegisterVolunteerScreen(
             ) {
                 Text("Registrar", color = Color.White)
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TextButton(
+                onClick = onBackToLogin
+            ) {
+                Text("Already have an account? Click here to login")
+            }
+
 
             when (uiState) {
                 is VolunteerViewModel.UiState.Loading -> {

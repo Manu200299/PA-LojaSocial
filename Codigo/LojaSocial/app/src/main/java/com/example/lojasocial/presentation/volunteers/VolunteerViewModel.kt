@@ -1,97 +1,68 @@
 package com.example.lojasocial.presentation.volunteers
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.lojasocial.domain.use_case.LoginVolunteerUseCase
-import com.example.lojasocial.domain.use_case.RegisterVolunteerUseCase
+import com.example.lojasocial.data.local.SessionManager
+import com.example.lojasocial.data.remote.api.FirebaseApi
+import com.example.lojasocial.data.repository.VolunteerRepositoryImpl
+import com.example.lojasocial.domain.model.Volunteer
+import com.example.lojasocial.domain.model.VolunteerLogin
+import com.example.lojasocial.domain.use_case.VolunteerLoginUseCase
+import com.example.lojasocial.domain.use_case.VolunteerRegisterUseCase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class VolunteerViewModel(
-    private val registerUseCase: RegisterVolunteerUseCase,
-    private val loginUseCase: LoginVolunteerUseCase
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
-    fun setUiStateError(message: String) {
-        _uiState.value = UiState.Error(message)
-    }
+    val auth = FirebaseAuth.getInstance()
+    val database = FirebaseDatabase.getInstance()
+    private val api = FirebaseApi(auth, database)
+    private val repository = VolunteerRepositoryImpl(api, sessionManager)
+
+    // Use case para VOLUNTEER
+    private val registerUseCase = VolunteerRegisterUseCase(repository)
+    private val loginUseCase = VolunteerLoginUseCase(repository)
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
     val uiState = _uiState.asStateFlow()
 
-    /**
-     * Valida os dados do voluntário antes do registro.
-     */
-    private fun isValidEmail(email: String): Boolean {
-        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
-    }
-
-    private fun isValidPassword(password: String): Boolean {
-        return password.length >= 6
-    }
-
-    /**
-     * Registra um voluntário com os dados fornecidos.
-     */
-    fun registerVolunteer(
-        nome: String,
-        email: String,
-        telefone: String,
-        password: String,
-        confirmarPassword: String,
-        dataNascimento: String
-    ) {
-        if (!isValidEmail(email)) {
-            _uiState.value = UiState.Error("Email inválido.")
-            return
-        }
-        if (!isValidPassword(password)) {
-            _uiState.value = UiState.Error("A password deve ter pelo menos 6 caracteres.")
-            return
-        }
-        if (password != confirmarPassword) {
-            _uiState.value = UiState.Error("As passwords não coincidem.")
-            return
-        }
-
+    fun registerVolunteer(addVolunteer: Volunteer) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
-            val result = registerUseCase(nome, email, telefone, password, dataNascimento)
-            _uiState.value = if (result.isSuccess) UiState.Success else UiState.Error(
-                result.exceptionOrNull()?.message ?: "Erro desconhecido ao registrar."
-            )
+            try {
+                val result = registerUseCase(addVolunteer)
+                if (result.isSuccess) {
+                    _uiState.value = UiState.Success
+                    Log.d("VolunteerRegistrationViewModel", "Registered volunteer: $addVolunteer")
+                } else {
+                    _uiState.value = UiState.Error(result.exceptionOrNull()?.message ?: "Unknown error")
+                }
+            } catch (e: Exception) {
+                _uiState.value = UiState.Error(e.message ?: "Unknown error")
+                Log.e("VolunteerRegistrationViewModel", "Error registering volunteer! | ${e.message}")
+            }
         }
     }
 
-    /**
-     * Realiza login de um voluntário com as credenciais fornecidas.
-     */
-    fun loginVolunteer(email: String, password: String) {
-        if (!isValidEmail(email)) {
-            _uiState.value = UiState.Error("Email inválido.")
-            return
-        }
-        if (password.isBlank()) {
-            _uiState.value = UiState.Error("A password não pode estar vazia.")
-            return
-        }
-
+    fun loginVolunteer(loginVolunteer: VolunteerLogin){
         viewModelScope.launch {
             _uiState.value = UiState.Loading
-            val result = loginUseCase(email, password)
-            _uiState.value = if (result.isSuccess) UiState.Success else UiState.Error(
-                result.exceptionOrNull()?.message ?: "Erro desconhecido ao fazer login."
-            )
+            try{
+                loginUseCase(loginVolunteer)
+                _uiState.value = UiState.Success
+                Log.d("VolunteerLoginViewModel", "Logging in volunteer: $loginVolunteer")
+            } catch (e: Exception){
+                _uiState.value = UiState.Error(e.message ?: "Unkown error")
+                Log.e("VolunteerLoginViewModel", "Error logging in volunteer! | ${e.message}")
+            }
         }
-    }
-
-    /**
-     * Reseta o estado da UI para Idle.
-     */
-    fun resetUiState() {
-        _uiState.value = UiState.Idle
     }
 
     sealed class UiState {
@@ -101,16 +72,13 @@ class VolunteerViewModel(
         data class Error(val message: String) : UiState()
     }
 
-    class Factory(
-        private val registerUseCase: RegisterVolunteerUseCase,
-        private val loginUseCase: LoginVolunteerUseCase
-    ) : ViewModelProvider.Factory {
+    class Factory(private val sessionManager: SessionManager) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(VolunteerViewModel::class.java)) {
-                return VolunteerViewModel(registerUseCase, loginUseCase) as T
+                return VolunteerViewModel(sessionManager) as T
             }
-            throw IllegalArgumentException("Classe de ViewModel desconhecida.")
+            throw IllegalArgumentException("Unkown ViewModel class.")
         }
     }
 }

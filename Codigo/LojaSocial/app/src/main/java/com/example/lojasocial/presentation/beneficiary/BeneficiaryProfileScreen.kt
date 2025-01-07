@@ -17,12 +17,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.lojasocial.data.model.Beneficiary
+import com.example.lojasocial.data.remote.model.BeneficiaryDto
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BeneficiaryProfileScreen(
-    beneficiary: Beneficiary,
+    beneficiaryDto: BeneficiaryDto,
     onNavigateBack: () -> Unit = {},
     onEditClick: () -> Unit = {},
     onStartVisitClick: () -> Unit = {}
@@ -90,7 +90,7 @@ fun BeneficiaryProfileScreen(
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            beneficiary.nome,
+                            beneficiaryDto.nome,
                             style = MaterialTheme.typography.titleMedium
                         )
                     }
@@ -110,7 +110,7 @@ fun BeneficiaryProfileScreen(
                                 tint = Color(0xFF3851F1)
                             )
                             Text(
-                                "Visitas: ${beneficiary.contadorVisitas}",
+                                "Visitas: ${beneficiaryDto.contadorVisitas}",
                                 style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier.padding(start = 8.dp)
                             )
@@ -124,7 +124,7 @@ fun BeneficiaryProfileScreen(
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Text(
-                                beneficiary.prioridade,
+                                beneficiaryDto.prioridade,
                                 color = Color(0xFFFFC300),
                                 fontWeight = FontWeight.Bold
                             )
@@ -139,7 +139,7 @@ fun BeneficiaryProfileScreen(
                                 tint = Color(0xFFFF0000)
                             )
                             Text(
-                                "Lista: ${beneficiary.prioridade}",
+                                "Lista: ${beneficiaryDto.prioridade}",
                                 style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier.padding(start = 8.dp)
                             )
@@ -174,21 +174,21 @@ fun BeneficiaryProfileScreen(
                             "Nº ID / Passaporte: ",
                             style = MaterialTheme.typography.titleMedium
                         )
-                        Text(beneficiary.numeroIdentificacao)
+                        Text(beneficiaryDto.numeroIdentificacao)
                     }
                     Row {
                         Text(
                             "Número Telefone: ",
                             style = MaterialTheme.typography.titleMedium
                         )
-                        Text(beneficiary.telefone)
+                        Text(beneficiaryDto.telefone)
                     }
                     Row {
                         Text(
                             "Agregado Familiar: ",
                             style = MaterialTheme.typography.titleMedium
                         )
-                        Text(beneficiary.nome)
+                        Text(beneficiaryDto.nome)
                     }
                     Column {
                         Text(

@@ -1,14 +1,21 @@
 package com.example.lojasocial
 
 import BeneficiaryRegistrationScreen
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -16,8 +23,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.lojasocial.data.local.SessionManager
+import com.example.lojasocial.data.remote.api.FirebaseApi
+import com.example.lojasocial.data.repository.BeneficiaryRepositoryImpl
+import com.example.lojasocial.data.repository.VolunteerRepositoryImpl
 import com.example.lojasocial.presentation.Stock.StockManagementScreen
-import com.example.lojasocial.presentation.beneficiary.CheckInBeneficiaryScreen
 import com.example.lojasocial.presentation.beneficiary.CheckOutBeneficiaryScreen
 import com.example.lojasocial.presentation.donations.NewDonationScreen
 import com.example.lojasocial.presentation.donations.ReceivingDonationsScreen
@@ -31,78 +41,93 @@ import com.example.lojasocial.presentation.volunteers.RegisterVolunteerScreen
 import com.example.lojasocial.presentation.volunteers.VolunteersScreen
 import com.example.lojasocial.ui.theme.LojaSocialTheme
 import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         FirebaseApp.initializeApp(this) // Initialize Firebase
+
         setContent {
             LojaSocialTheme {
                 val navController = rememberNavController() // Initialize NavController
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                val sessionManager = remember { SessionManager(this@MainActivity) }
+                var isLoggedIn by remember { mutableStateOf(false) }
+
+                LaunchedEffect(Unit) {
+                    sessionManager.isLoggedIn.collect { loggedIn ->
+                        isLoggedIn = loggedIn
+                    }
+                }
+
+                NavHost(
+                    navController = navController,
+                    startDestination = if (isLoggedIn) "home" else "volunteer_register"
                 ) {
-                    provideDependencies {
-                        AppNavHost(navController = navController) // Pass NavController
+                    composable("home") {
+                        HomeScreen(onMenuItemClick = { menuItem ->
+                            navController.navigate(menuItem.route) // Navigate using the route
+                        })
+                    }
+                    composable("register") {
+                        BeneficiaryRegistrationScreen(
+                            sessionManager = sessionManager,
+                            onNavigateBack = {
+                                navController.navigate("home")
+                            })
+                    }
+
+//                    composable("check_in") { CheckInBeneficiaryScreen() }
+
+                    composable("check_out") { CheckOutBeneficiaryScreen() }
+
+                    composable("stock") { StockManagementScreen() }
+
+                    composable("donations") {
+                        ReceivingDonationsScreen(navController = navController)
+                    }
+
+                    composable("new_donation") {
+                        NewDonationScreen(
+                            onNavigateBack = { navController.popBackStack() },
+                            onAddItem = { donationItem ->
+                                println("New donation added: $donationItem")
+                                navController.popBackStack() // Return to ReceivingDonationsScreen
+                            }
+                        )
+                    }
+
+                    composable("verify_donations") {
+                        VerifyDonationsScreen(
+                            onNavigateBack = { navController.popBackStack() },
+//                            donations = TODO()
+                        )
+                    }
+
+                    composable("volunteers") { VolunteersScreen() }
+
+                    composable("statistics") { StatisticsDataScreen() }
+
+                    composable("language") { LanguageScreen() }
+
+                    composable("volunteer_register") {
+                        RegisterVolunteerScreen(
+                            sessionManager = sessionManager,
+                            onBackToLogin = {
+                                navController.navigate("volunteer_login")
+                            })
+                    }
+
+                    composable("volunteer_login") { LoginVolunteerScreen(sessionManager = sessionManager) }
+
+                    composable("exit") {
+                        ExitApplicationWithConfirmation(navController)
                     }
                 }
             }
         }
     }
-
-    @Composable
-    private fun provideDependencies(content: @Composable () -> Unit) {
-        val dependencies = (applicationContext as LojaSocialApplication).dependencies
-        CompositionLocalProvider(LocalAppDependencies provides dependencies) {
-            content()
-        }
-    }
 }
-
-
-@Composable
-fun AppNavHost(navController: NavHostController) {
-    NavHost(
-        navController = navController,
-        startDestination = "home"
-    ) {
-        composable("home") {
-            HomeScreen(onMenuItemClick = { menuItem ->
-                navController.navigate(menuItem.route) // Navigate using the route
-            })
-        }
-        composable("register") { BeneficiaryRegistrationScreen() }
-        composable("check_in") { CheckInBeneficiaryScreen() }
-        composable("check_out") { CheckOutBeneficiaryScreen() }
-        composable("stock") { StockManagementScreen() }
-        composable("donations") {
-            ReceivingDonationsScreen(navController = navController)
-        }
-        composable("new_donation") {
-            NewDonationScreen (
-                onNavigateBack = { navController.popBackStack() },
-                onAddItem = { donationItem ->
-                    println("New donation added: $donationItem")
-                    navController.popBackStack() // Return to ReceivingDonationsScreen
-                }
-            )
-        }
-        composable("verify_donations") {
-            VerifyDonationsScreen(
-                onNavigateBack ={navController.popBackStack() },
-                donations = TODO()
-            )
-        }
-
-        composable("volunteers") { VolunteersScreen() }
-        composable("statistics") { StatisticsDataScreen() }
-        composable("language") { LanguageScreen() }
-        composable("volunteer_register") { RegisterVolunteerScreen() }
-        composable("volunteer_login") { LoginVolunteerScreen() }
-        composable("exit") {
-            ExitApplicationWithConfirmation(navController)
-        }
-    }
-}
-

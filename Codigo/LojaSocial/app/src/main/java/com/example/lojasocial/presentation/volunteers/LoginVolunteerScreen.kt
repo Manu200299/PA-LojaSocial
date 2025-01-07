@@ -1,5 +1,6 @@
 package com.example.lojasocial.presentation.volunteers
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -14,26 +15,26 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.lojasocial.LocalAppDependencies
+import com.example.lojasocial.data.local.SessionManager
+import com.example.lojasocial.domain.model.VolunteerLogin
+import kotlin.math.log
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginVolunteerScreen(
     onNavigateBack: () -> Unit = {},
-    onLoginSuccess: () -> Unit = {}
+    onLoginSuccess: () -> Unit = {},
+    sessionManager: SessionManager
+
 ) {
-    val volunteerViewModel: VolunteerViewModel = viewModel(
-        factory = VolunteerViewModel.Factory(
-            registerUseCase = LocalAppDependencies.current.registerVolunteerUseCase,
-            loginUseCase = LocalAppDependencies.current.loginVolunteerUseCase
-        )
+    val viewModel: VolunteerViewModel= viewModel(
+        factory = VolunteerViewModel.Factory(sessionManager)
     )
 
-    val uiState by volunteerViewModel.uiState.collectAsState()
-
-    var email by remember { mutableStateOf("") }
+    var telefone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -59,9 +60,9 @@ fun LoginVolunteerScreen(
             Text("Entre na sua conta de voluntário", style = MaterialTheme.typography.titleLarge)
 
             OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email") },
+                value = telefone,
+                onValueChange = { telefone = it },
+                label = { Text("Telefone") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -85,10 +86,17 @@ fun LoginVolunteerScreen(
 
             Button(
                 onClick = {
-                    if (email.isBlank() || password.isBlank()) {
-                        volunteerViewModel.setUiStateError("Por favor, preencha todos os campos.")
-                    } else {
-                        volunteerViewModel.loginVolunteer(email.trim(), password.trim())
+                    val loginVolunteer = VolunteerLogin(
+                        telefone = telefone,
+                         password = password
+                    )
+
+                    if (telefone.isBlank() || password.isBlank()){
+                        // volunteerViewModel.setUiStateError("Por favor, preencha todos os campos.")
+                        Log.e("LoginViewModel", "Please, fill all the required fields")
+                    } else{
+                        viewModel.loginVolunteer(loginVolunteer)
+
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),

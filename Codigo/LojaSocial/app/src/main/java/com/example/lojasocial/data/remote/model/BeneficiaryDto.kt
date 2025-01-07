@@ -1,8 +1,11 @@
-package com.example.lojasocial.domain.model
+package com.example.lojasocial.data.remote.model
 
-import com.example.lojasocial.data.remote.model.BeneficiaryDto
+import com.example.lojasocial.domain.model.Beneficiary
+import com.google.firebase.database.IgnoreExtraProperties
 
-data class Beneficiary(
+// Data model dos Beneficiarios
+@IgnoreExtraProperties
+data class BeneficiaryDto(
     var id: String = "",
     var nome: String = "",
     var nacionalidade: String = "",
@@ -15,10 +18,9 @@ data class Beneficiary(
     var prioridade: String = "",
     var escola: String = "",
     var anoEscolar: String = ""
-    // Adicionar data de registo
 ) {
-    fun toBeneficiaryDto(): BeneficiaryDto{
-        return BeneficiaryDto(
+    fun toBeneficiary(): Beneficiary{
+        return Beneficiary(
             id = id,
             nome = nome,
             nacionalidade = nacionalidade,
@@ -33,5 +35,7 @@ data class Beneficiary(
             anoEscolar = anoEscolar
         )
     }
-}
 
+    // No-argument constructor for Firebase
+    constructor() : this("", "", "", "", "", "", "", "", 0, "", "", "")
+}

@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.lojasocial.data.local.SessionManager
 import com.example.lojasocial.domain.model.Beneficiary
+import com.example.lojasocial.presentation.beneficiary.BeneficiaryViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -7,6 +7,7 @@ import com.example.lojasocial.domain.model.Beneficiary
 import com.example.lojasocial.domain.repository.BeneficiaryRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.util.UUID
 
 // Repositorio beneficiario da camada de dados
 class BeneficiaryRepositoryImpl(
@@ -16,7 +17,8 @@ class BeneficiaryRepositoryImpl(
 
     // Funcao para adicionar beneficiario
     override suspend fun addBeneficiary(addBeneficiary: Beneficiary): Result<Unit> {
-        return api.addBeneficiary(addBeneficiary.toBeneficiaryDto())
+        val beneficiaryWithId = addBeneficiary.copy(id = generateUUID())
+        return api.addBeneficiary(beneficiaryWithId.toBeneficiaryDto())
     }
 
 
@@ -43,6 +45,10 @@ class BeneficiaryRepositoryImpl(
                 it.numeroIdentificacao.contains(id)
             }
         }
+    }
+
+    private fun generateUUID(): String {
+        return UUID.randomUUID().toString()
     }
 
     // TODO Funcao para pesquisar beneficiario por familia

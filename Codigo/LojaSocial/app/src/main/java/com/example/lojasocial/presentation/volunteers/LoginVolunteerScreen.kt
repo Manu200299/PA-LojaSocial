@@ -1,7 +1,11 @@
 package com.example.lojasocial.presentation.volunteers
 
 import android.util.Log
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Visibility
@@ -11,10 +15,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.lojasocial.R
 import com.example.lojasocial.data.local.SessionManager
 import com.example.lojasocial.domain.model.VolunteerLogin
 import kotlin.math.log
@@ -27,7 +34,7 @@ fun LoginVolunteerScreen(
     sessionManager: SessionManager
 
 ) {
-    val viewModel: VolunteerViewModel= viewModel(
+    val viewModel: VolunteerViewModel = viewModel(
         factory = VolunteerViewModel.Factory(sessionManager)
     )
 
@@ -42,7 +49,11 @@ fun LoginVolunteerScreen(
                 title = { Text("Login Voluntário", color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Voltar", tint = Color.White)
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = "Voltar",
+                            tint = Color.White
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF3851F1))
@@ -88,13 +99,13 @@ fun LoginVolunteerScreen(
                 onClick = {
                     val loginVolunteer = VolunteerLogin(
                         telefone = telefone,
-                         password = password
+                        password = password
                     )
 
-                    if (telefone.isBlank() || password.isBlank()){
+                    if (telefone.isBlank() || password.isBlank()) {
                         // volunteerViewModel.setUiStateError("Por favor, preencha todos os campos.")
                         Log.e("LoginViewModel", "Please, fill all the required fields")
-                    } else{
+                    } else {
                         viewModel.loginVolunteer(loginVolunteer)
 
                     }
@@ -110,17 +121,20 @@ fun LoginVolunteerScreen(
                 is VolunteerViewModel.UiState.Loading -> {
                     CircularProgressIndicator()
                 }
+
                 is VolunteerViewModel.UiState.Success -> {
                     LaunchedEffect(Unit) {
                         onLoginSuccess()
                     }
                 }
+
                 is VolunteerViewModel.UiState.Error -> {
                     Text(
                         text = (uiState as VolunteerViewModel.UiState.Error).message,
                         color = Color.Red
                     )
                 }
+
                 else -> {}
             }
         }

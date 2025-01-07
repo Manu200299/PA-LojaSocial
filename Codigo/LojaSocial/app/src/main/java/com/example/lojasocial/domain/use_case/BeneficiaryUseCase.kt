@@ -13,9 +13,9 @@ class GetBeneficiariesUseCase(private val repository: BeneficiaryRepository){
 }
 
 class AddBeneficiaryUseCase(private val repository: BeneficiaryRepository){
-    suspend operator fun invoke(addBeneficiary: Beneficiary){
-        repository.addBeneficiary(addBeneficiary)
+    suspend operator fun invoke(addBeneficiary: Beneficiary): Result<Unit>{
         Log.d("UseCase", "Adding beneficiary: $addBeneficiary")
+        return repository.addBeneficiary(addBeneficiary)
     }
 }
 

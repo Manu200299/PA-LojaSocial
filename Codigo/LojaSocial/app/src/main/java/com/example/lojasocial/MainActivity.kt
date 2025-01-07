@@ -28,6 +28,7 @@ import com.example.lojasocial.data.remote.api.FirebaseApi
 import com.example.lojasocial.data.repository.BeneficiaryRepositoryImpl
 import com.example.lojasocial.data.repository.VolunteerRepositoryImpl
 import com.example.lojasocial.presentation.Stock.StockManagementScreen
+import com.example.lojasocial.presentation.beneficiary.CheckInBeneficiaryScreen
 import com.example.lojasocial.presentation.beneficiary.CheckOutBeneficiaryScreen
 import com.example.lojasocial.presentation.donations.NewDonationScreen
 import com.example.lojasocial.presentation.donations.ReceivingDonationsScreen
@@ -80,7 +81,9 @@ class MainActivity : ComponentActivity() {
                             })
                     }
 
-//                    composable("check_in") { CheckInBeneficiaryScreen() }
+                    composable("check_in") { CheckInBeneficiaryScreen(
+                        sessionManager = sessionManager
+                    ) }
 
                     composable("check_out") { CheckOutBeneficiaryScreen() }
 

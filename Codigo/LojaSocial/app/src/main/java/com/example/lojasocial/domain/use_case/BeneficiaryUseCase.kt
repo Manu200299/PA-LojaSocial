@@ -19,6 +19,13 @@ class AddBeneficiaryUseCase(private val repository: BeneficiaryRepository){
     }
 }
 
+class GetBeneficiaryByIdUseCase(private val repository: BeneficiaryRepository){
+    suspend operator fun invoke(beneficiaryId: String): Beneficiary?{
+        Log.d("UseCase", "Fetching beneficiary $beneficiaryId...")
+        return repository.getBeneficiaryById(beneficiaryId)
+    }
+}
+
 class BeneficiarySearchByPhoneNumberUseCase(private val repository: BeneficiaryRepository){
     suspend operator fun invoke(number: String): Flow<List<Beneficiary>>{
         Log.d("UseCase", "Searching for beneficiary phone number: $number")

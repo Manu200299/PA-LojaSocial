@@ -20,14 +20,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.lojasocial.data.local.SessionManager
 import com.example.lojasocial.data.remote.api.FirebaseApi
 import com.example.lojasocial.data.repository.BeneficiaryRepositoryImpl
 import com.example.lojasocial.data.repository.VolunteerRepositoryImpl
 import com.example.lojasocial.presentation.Stock.StockManagementScreen
+import com.example.lojasocial.presentation.beneficiary.BeneficiaryProfileScreen
 import com.example.lojasocial.presentation.beneficiary.CheckInBeneficiaryScreen
 import com.example.lojasocial.presentation.beneficiary.CheckOutBeneficiaryScreen
 import com.example.lojasocial.presentation.donations.NewDonationScreen
@@ -82,8 +85,23 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("check_in") { CheckInBeneficiaryScreen(
-                        sessionManager = sessionManager
+                        sessionManager = sessionManager,
+                        onBeneficiarySelected = { beneficiary ->
+                            navController.navigate("beneficiary_profile/${beneficiary.id}")
+                        },
+                        onNavigateBack = {
+                            navController.popBackStack()
+                        }
                     ) }
+
+                    composable("beneficiary_profile/{beneficiaryId}", arguments = listOf(navArgument("beneficiaryId") { type = NavType.StringType})
+                    ){ backStackEntry ->
+                        val beneficiaryId = backStackEntry.arguments?.getString("beneficiaryId")
+                        BeneficiaryProfileScreen(
+                            beneficiaryId = beneficiaryId ?: "",
+                            sessionManager = sessionManager
+                        )
+                    } // beneficiary profile screen
 
                     composable("check_out") { CheckOutBeneficiaryScreen() }
 

@@ -13,8 +13,10 @@ import com.example.lojasocial.domain.use_case.AddBeneficiaryUseCase
 import com.example.lojasocial.domain.use_case.BeneficiarySearchByIdNumberUseCase
 import com.example.lojasocial.domain.use_case.BeneficiarySearchByPhoneNumberUseCase
 import com.example.lojasocial.domain.use_case.GetBeneficiariesUseCase
+import com.example.lojasocial.domain.use_case.GetBeneficiaryByIdUseCase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.snapshot.StringNode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,6 +36,7 @@ class BeneficiaryViewModel(
     private val addBeneficiaryUseCase = AddBeneficiaryUseCase(repository)
     private val searchByPhoneNumberUseCase = BeneficiarySearchByPhoneNumberUseCase(repository)
     private val searchByIdNumberUseCase = BeneficiarySearchByIdNumberUseCase(repository)
+    private val getBeneficiaryByIdUseCase = GetBeneficiaryByIdUseCase(repository)
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
     val uiState = _uiState.asStateFlow()
@@ -46,6 +49,9 @@ class BeneficiaryViewModel(
 
     private val _searchType = MutableStateFlow(SearchType.PHONE)
     val searchType = _searchType.asStateFlow()
+
+    private val _selectedBeneficary = MutableStateFlow<Beneficiary?>(null)
+    val selectedBeneficiary = _selectedBeneficary.asStateFlow()
 
     fun onSearchQueryChange(query: String) {
         _searchQuery.value = query
@@ -92,6 +98,25 @@ class BeneficiaryViewModel(
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Unknown error")
                 Log.e("BeneficiaryViewModel", "Error adding beneficiary: ${e.message}")
+            }
+        }
+    }
+
+    // falta implementar no screen
+    fun getBeneficiarybyId(beneficiaryId: String){
+        viewModelScope.launch {
+            _uiState.value = UiState.Loading
+            try{
+                val beneficiary = getBeneficiaryByIdUseCase(beneficiaryId)
+                if (beneficiary != null) {
+                    _selectedBeneficary.value = beneficiary
+                    _uiState.value = UiState.Success
+                } else {
+                    _uiState.value = UiState.Error("Beneficiary not found!")
+                }
+            } catch (e: Exception){
+                _uiState.value = UiState.Error(e.message ?: "Unkown Error")
+                Log.e("BeneficiaryViewModel", "Error loading beneficiary: ${e.message}")
             }
         }
     }

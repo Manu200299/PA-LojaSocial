@@ -29,6 +29,11 @@ class BeneficiaryRepositoryImpl(
         }
     }
 
+    // Funcao para extrair beneficiario atraves do seu id
+    override suspend fun getBeneficiaryById(beneficiaryId: String): Beneficiary?{
+        return api.getBeneficiaryById(beneficiaryId)?.toBeneficiary()
+    }
+
     // Funcao para pesquisar beneficiario por numero de telemovel
     override suspend fun searchByPhoneNumber(number: String): Flow<List<Beneficiary>> {
         return api.getBeneficiaries().map { dtoList ->

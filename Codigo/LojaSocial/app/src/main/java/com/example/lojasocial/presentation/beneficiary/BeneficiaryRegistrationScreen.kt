@@ -46,11 +46,6 @@ import com.example.lojasocial.presentation.beneficiary.BeneficiaryViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BeneficiaryRegistrationScreen(
-//    viewModel: BeneficiaryRegistrationViewModel = viewModel(
-//        factory = BeneficiaryRegistrationViewModel.Factory(
-//            LocalAppDependencies.current.addBeneficiaryUseCase
-//        )
-//    ),
 //    onRegisterSuccess: () -> Unit,
     onNavigateBack: () -> Unit,
     sessionManager: SessionManager

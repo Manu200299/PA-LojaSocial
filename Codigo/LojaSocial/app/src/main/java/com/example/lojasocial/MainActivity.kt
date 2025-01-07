@@ -6,28 +6,15 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.lojasocial.data.local.SessionManager
-import com.example.lojasocial.data.remote.api.FirebaseApi
-import com.example.lojasocial.data.repository.BeneficiaryRepositoryImpl
-import com.example.lojasocial.data.repository.VolunteerRepositoryImpl
-import com.example.lojasocial.presentation.Stock.StockManagementScreen
 import com.example.lojasocial.presentation.beneficiary.CheckInBeneficiaryScreen
 import com.example.lojasocial.presentation.beneficiary.CheckOutBeneficiaryScreen
 import com.example.lojasocial.presentation.donations.NewDonationScreen
@@ -37,15 +24,17 @@ import com.example.lojasocial.presentation.home.ExitApplicationWithConfirmation
 import com.example.lojasocial.presentation.home.HomeScreen
 import com.example.lojasocial.presentation.language.LanguageScreen
 import com.example.lojasocial.presentation.statistics.StatisticsDataScreen
+import com.example.lojasocial.presentation.stock.StockManagementScreen
+import com.example.lojasocial.presentation.stock.InventoryScreen
+import com.example.lojasocial.presentation.stock.AddNewItemScreen
 import com.example.lojasocial.presentation.volunteers.LoginVolunteerScreen
 import com.example.lojasocial.presentation.volunteers.RegisterVolunteerScreen
 import com.example.lojasocial.presentation.volunteers.VolunteersScreen
 import com.example.lojasocial.ui.theme.LojaSocialTheme
 import com.google.firebase.FirebaseApp
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
 
 class MainActivity : ComponentActivity() {
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,74 +47,132 @@ class MainActivity : ComponentActivity() {
                 val sessionManager = remember { SessionManager(this@MainActivity) }
                 var isLoggedIn by remember { mutableStateOf(false) }
 
+                // Observa o fluxo para saber se o user está logado
                 LaunchedEffect(Unit) {
                     sessionManager.isLoggedIn.collect { loggedIn ->
                         isLoggedIn = loggedIn
                     }
                 }
 
+                // Define as rotas do NavHost
                 NavHost(
                     navController = navController,
                     startDestination = if (isLoggedIn) "home" else "volunteer_register"
                 ) {
+                    // HOME
                     composable("home") {
-                        HomeScreen(onMenuItemClick = { menuItem ->
-                            navController.navigate(menuItem.route) // Navigate using the route
-                        })
+                        HomeScreen(
+                            onMenuItemClick = { menuItem ->
+                                navController.navigate(menuItem.route)
+                            }
+                        )
                     }
+
+                    // REGISTAR BENEFICIÁRIO
                     composable("register") {
                         BeneficiaryRegistrationScreen(
                             sessionManager = sessionManager,
                             onNavigateBack = {
                                 navController.navigate("home")
-                            })
+                            }
+                        )
                     }
 
-                    composable("check_in") { CheckInBeneficiaryScreen(
-                        sessionManager = sessionManager
-                    ) }
+                    // CHECK-IN BENEFICIÁRIO
+                    composable("check_in") {
+                        CheckInBeneficiaryScreen(sessionManager = sessionManager)
+                    }
 
-                    composable("check_out") { CheckOutBeneficiaryScreen() }
+                    // CHECK-OUT BENEFICIÁRIO
+                    composable("check_out") {
+                        CheckOutBeneficiaryScreen()
+                    }
 
-                    composable("stock") { StockManagementScreen() }
+                    // GESTÃO DE STOCK
+                    composable("stock") {
+                        StockManagementScreen(
+                            onNavigateBack = { navController.popBackStack() },
+                            onInventoryClick = {
+                                navController.navigate("inventory_screen")
+                            },
+                            onAddItemClick = {
+                                navController.navigate("add_new_item_screen")
+                            }
+                        )
+                    }
 
+                    // INVENTÁRIO
+                    composable("inventory_screen") {
+                        // Aqui podes chamar a tua InventoryScreen real.
+                        // Coloco aqui um exemplo rápido de placeholder:
+                        InventoryScreen(
+                            onNavigateBack = { navController.popBackStack() }
+                        )
+                    }
+
+                    // ADICIONAR NOVO ITEM AO STOCK
+                    composable("add_new_item_screen") {
+                        // Chama a tua AddNewItemScreen real
+                        AddNewItemScreen(
+                            onNavigateBack = { navController.popBackStack() }
+                        )
+                    }
+
+                    // DOAÇÕES
                     composable("donations") {
                         ReceivingDonationsScreen(navController = navController)
                     }
 
+                    // NOVA DOAÇÃO
                     composable("new_donation") {
                         NewDonationScreen(
                             onNavigateBack = { navController.popBackStack() },
                             onAddItem = { donationItem ->
                                 println("New donation added: $donationItem")
-                                navController.popBackStack() // Return to ReceivingDonationsScreen
+                                navController.popBackStack()
                             }
                         )
                     }
 
+                    // VERIFICAR DOAÇÕES
                     composable("verify_donations") {
                         VerifyDonationsScreen(
                             onNavigateBack = { navController.popBackStack() },
-//                            donations = TODO()
+                            // donations = ...
                         )
                     }
 
-                    composable("volunteers") { VolunteersScreen() }
+                    // VOLUNTÁRIOS
+                    composable("volunteers") {
+                        VolunteersScreen()
+                    }
 
-                    composable("statistics") { StatisticsDataScreen() }
+                    // ESTATÍSTICAS
+                    composable("statistics") {
+                        StatisticsDataScreen()
+                    }
 
-                    composable("language") { LanguageScreen() }
+                    // IDIOMA
+                    composable("language") {
+                        LanguageScreen()
+                    }
 
+                    // REGISTAR VOLUNTÁRIO
                     composable("volunteer_register") {
                         RegisterVolunteerScreen(
                             sessionManager = sessionManager,
                             onBackToLogin = {
                                 navController.navigate("volunteer_login")
-                            })
+                            }
+                        )
                     }
 
-                    composable("volunteer_login") { LoginVolunteerScreen(sessionManager = sessionManager) }
+                    // LOGIN VOLUNTÁRIO
+                    composable("volunteer_login") {
+                        LoginVolunteerScreen(sessionManager = sessionManager)
+                    }
 
+                    // SAIR (com confirmação)
                     composable("exit") {
                         ExitApplicationWithConfirmation(navController)
                     }

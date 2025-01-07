@@ -1,6 +1,7 @@
 package com.example.lojasocial.data.remote.api
 
 import com.example.lojasocial.data.remote.model.BeneficiaryDto
+import com.example.lojasocial.data.remote.model.StockItemDto
 import com.example.lojasocial.data.remote.model.VolunteerDto
 import com.example.lojasocial.data.remote.model.VolunteerLoginDto
 import com.example.lojasocial.domain.model.VolunteerLogin
@@ -26,6 +27,8 @@ class FirebaseApi(
     // Nome das tabelas no firebase
     private val beneficiariesRef = database.getReference("Beneficiarios")
     private val volunteersRef = database.getReference("Voluntarios")
+    private val stockRef = database.getReference("Stock")
+
 
     // Funcao para adicionar beneficiarios
     suspend fun addBeneficiary(beneficiaryDto: BeneficiaryDto): Result<Unit> {
@@ -97,4 +100,64 @@ class FirebaseApi(
             Result.failure(e)
         }
     }
+
+    // CREATE: adicionar um item ao stock
+    suspend fun addStockItem(stockItemDto: StockItemDto): Result<Unit> {
+        return try {
+            val newItemId = stockRef.push().key
+                ?: return Result.failure(Exception("Falha ao gerar ID para o item de stock."))
+
+            stockItemDto.itemId = newItemId
+            stockRef.child(newItemId).setValue(stockItemDto).await()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // READ: obter todos os itens em stock
+    // (usa Flow, tal como fazes com beneficiaries, volunteers, etc.)
+    suspend fun getStockItems(): kotlinx.coroutines.flow.Flow<List<StockItemDto>> = callbackFlow {
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val items = snapshot.children.mapNotNull {
+                    it.getValue(StockItemDto::class.java)
+                }
+                trySend(items)
+            }
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+            }
+        }
+        stockRef.addValueEventListener(listener)
+        awaitClose {
+            stockRef.removeEventListener(listener)
+        }
+    }
+
+    // UPDATE: actualizar um item
+    suspend fun updateStockItem(stockItemDto: StockItemDto): Result<Unit> {
+        return try {
+            if (stockItemDto.itemId.isBlank()) {
+                return Result.failure(Exception("ID do item vazio."))
+            }
+            stockRef.child(stockItemDto.itemId).setValue(stockItemDto).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // DELETE: remover item
+    suspend fun deleteStockItem(itemId: String): Result<Unit> {
+        return try {
+            stockRef.child(itemId).removeValue().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+
 }

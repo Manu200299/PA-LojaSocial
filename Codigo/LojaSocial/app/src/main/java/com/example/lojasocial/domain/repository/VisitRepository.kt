@@ -10,4 +10,5 @@ interface VisitRepository {
     suspend fun getVisitsByBeneficiaryId(beneficiaryId: String): Flow<List<Visit>>
     suspend fun getActiveVisitForBeneficiary(beneficiaryId: String): Visit?
     suspend fun finalizeVisit(visitId: String): Result<Unit>
+    suspend fun getVisitById(visitId: String): Visit?
 }

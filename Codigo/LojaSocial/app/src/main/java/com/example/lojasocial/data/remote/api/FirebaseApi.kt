@@ -277,18 +277,31 @@ class FirebaseApi(
     }
 
     // Funcao para ver se o beneficiario tem uma visita ativa
+    // Funcao para ver se o beneficiario tem uma visita ativa
     suspend fun getActiveVisitForBeneficiary(beneficiaryId: String): VisitDto? {
         return try {
+            Log.d("FirebaseApi", "Querying Firebase for active visit for beneficiary: $beneficiaryId")
             val snapshot = visitsRef
                 .orderByChild("beneficiaryId")
                 .equalTo(beneficiaryId)
                 .get()
                 .await()
 
-            snapshot.children
+            Log.d("FirebaseApi", "Received snapshot from Firebase: ${snapshot.childrenCount} children")
+
+            val activeVisit = snapshot.children
                 .mapNotNull { it.getValue(VisitDto::class.java) }
                 .firstOrNull { !it.isFinished && it.beneficiaryId == beneficiaryId }
+
+            if (activeVisit != null) {
+                Log.d("FirebaseApi", "Found active visit: ${activeVisit.id}")
+            } else {
+                Log.d("FirebaseApi", "No active visit found for beneficiary: $beneficiaryId")
+            }
+
+            activeVisit
         } catch (e: Exception){
+            Log.e("FirebaseApi", "Error querying active visit: ${e.message}", e)
             null
         }
     }
@@ -300,6 +313,16 @@ class FirebaseApi(
             Result.success(Unit)
         } catch (e:Exception){
             Result.failure(e)
+        }
+    }
+
+    suspend fun getVisitById(visitId: String): VisitDto? {
+        return try {
+            val snapshot = visitsRef.child(visitId).get().await()
+            snapshot.getValue(VisitDto::class.java)
+        } catch (e: Exception) {
+            Log.e("FirebaseApi", "Error getting visit by ID: ${e.message}")
+            null
         }
     }
 }

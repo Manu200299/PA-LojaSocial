@@ -16,6 +16,7 @@ import com.example.lojasocial.domain.use_case.FinalizeVisitUseCase
 import com.example.lojasocial.domain.use_case.GetActiveVisitsForBeneficiaryUseCase
 import com.example.lojasocial.domain.use_case.GetStockCategoriesUseCase
 import com.example.lojasocial.domain.use_case.GetStockItemsUseCase
+import com.example.lojasocial.domain.use_case.GetVisitByIdUseCase
 import com.example.lojasocial.domain.use_case.GetVisitsByBeneficiaryIdUseCase
 import com.example.lojasocial.domain.use_case.UpdateVisitUseCase
 import com.google.firebase.auth.FirebaseAuth
@@ -74,6 +75,23 @@ class VisitViewModel(
     init {
         loadStockItems()
         loadCategories()
+    }
+
+    fun loadVisit(beneficiaryId: String) {
+        viewModelScope.launch {
+            _uiState.value = UiState.Loading
+            try {
+                val activeVisit = getActiveVisitsForBeneficiaryUseCase(beneficiaryId)
+                if (activeVisit != null) {
+                    _currentVisit.value = activeVisit
+                    _uiState.value = UiState.Success
+                } else {
+                    _uiState.value = UiState.Error("No active visit found")
+                }
+            } catch (e: Exception) {
+                _uiState.value = UiState.Error(e.message ?: "Failed to load visit")
+            }
+        }
     }
 
     fun loadStockItems(){
@@ -155,21 +173,30 @@ class VisitViewModel(
 
     // Adiciona e remove tambem
     fun addItemToVisit(stockItemId: String, quantity: Int) {
-        val currentVisit = _currentVisit.value ?: return
-        val updatedItems = currentVisit.items.toMutableList()
-        val existingItem = updatedItems.find { it.stockItemId == stockItemId }
-        if (existingItem != null) {
-            val newQuantity = existingItem.quantity + quantity
-            if (newQuantity > 0){
-                updatedItems.remove(existingItem)
-                updatedItems.add(existingItem.copy(quantity = newQuantity))
+        viewModelScope.launch {
+            val currentVisit = _currentVisit.value ?: return@launch
+            val updatedItems = currentVisit.items.toMutableList()
+            val existingItem = updatedItems.find { it.stockItemId == stockItemId }
+            val stockItem = _stockItems.value.find { it.itemId == stockItemId } ?: return@launch
+
+            val currentQuantity = existingItem?.quantity ?: 0
+            val newQuantity = (currentQuantity + quantity).coerceIn(0, stockItem.quantidade)
+
+            if (newQuantity > 0) {
+                if (existingItem != null) {
+                    updatedItems[updatedItems.indexOf(existingItem)] = existingItem.copy(quantity = newQuantity)
+                } else {
+                    updatedItems.add(VisitItem(stockItemId, newQuantity))
+                }
             } else {
                 updatedItems.remove(existingItem)
             }
-        } else if (quantity > 0){
-            updatedItems.add(VisitItem(stockItemId, quantity))
+
+            val updatedVisit = currentVisit.copy(items = updatedItems)
+            _currentVisit.value = updatedVisit
+
+            updateVisitUseCase(updatedVisit)
         }
-        _currentVisit.value = currentVisit.copy(items = updatedItems)
     }
 
     fun removeItemFromVisit(stockItemId: String) {
@@ -191,7 +218,7 @@ class VisitViewModel(
                 }.onFailure { error ->
                     _uiState.value = UiState.Error(error.message ?: "Failed to finalize visit")
                     Log.e("VisitViewModel", "Error finalizing visit: ${error.message}")
-                 }
+                }
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Failed to finalize visit")
                 Log.e("VisitViewModel", "Error finalizing visit: ${e.message}")

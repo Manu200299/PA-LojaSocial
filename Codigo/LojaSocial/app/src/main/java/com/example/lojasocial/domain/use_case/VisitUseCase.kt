@@ -40,4 +40,10 @@ class FinalizeVisitUseCase(private val repository: VisitRepository) {
     }
 }
 
+class GetVisitByIdUseCase(private val repository: VisitRepository) {
+    suspend operator fun invoke(visitId: String): Visit? {
+        return repository.getVisitById(visitId)
+    }
+}
+
 // FALTA REPLICAR USE CASES DO REPOSITORIO

@@ -49,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.lojasocial.data.local.SessionManager
@@ -77,9 +78,10 @@ fun VisitStockSelectionScreen(
     var searchQuery by remember { mutableStateOf("") }
     var showCategoryDropdown by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(beneficiaryId) {
         viewModel.loadStockItems()
         viewModel.checkActiveVisit(beneficiaryId)
+        viewModel.loadVisit(beneficiaryId)
     }
 
     Column(
@@ -189,9 +191,9 @@ fun VisitStockSelectionScreen(
                             expanded = showCategoryDropdown,
                             onDismissRequest = { showCategoryDropdown = false }
                         ) {
-                            categories.forEach{ category ->
+                            categories.forEach { category ->
                                 DropdownMenuItem(
-                                    text = { Text(category)},
+                                    text = { Text(category) },
                                     onClick = {
                                         viewModel.updateSelectedCategory(category)
                                         showCategoryDropdown = false
@@ -210,6 +212,7 @@ fun VisitStockSelectionScreen(
                         color = Color(0xFF3851F1)
                     )
                 }
+
                 is VisitViewModel.UiState.Success -> {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
@@ -217,13 +220,17 @@ fun VisitStockSelectionScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(filteredStockItems) { item ->
+                        items(stockItems) { item ->
+                            val quantity =
+                                currentVisit?.items?.find { it.stockItemId == item.itemId }?.quantity
+                                    ?: 0
                             StockItemCard(
                                 item = item,
-                                quantity = currentVisit?.items?.find { it.stockItemId == item.itemId }?.quantity ?: 0,
+                                quantity = quantity,
                                 onAddItem = { viewModel.addItemToVisit(item.itemId, 1) },
-                                onRemoveItem = { viewModel.removeItemFromVisit(item.itemId) }
-                            )
+                                onRemoveItem = { viewModel.removeItemFromVisit(item.itemId) },
+                                isMaxQuantity = quantity >= item.quantidade
+                                )
                         }
                     }
 
@@ -236,18 +243,17 @@ fun VisitStockSelectionScreen(
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3851F1)),
                         shape = RoundedCornerShape(28.dp)
                     ) {
-                        Text(
-                            "Seguinte",
-                            style = MaterialTheme.typography.titleLarge.copy(color = Color.White)
-                        )
+                        Text("Rever Visita", color = Color.White)
                     }
                 }
+
                 is VisitViewModel.UiState.Error -> {
                     Text(
                         (uiState as VisitViewModel.UiState.Error).message,
                         color = Color(0xFFFF0000)
                     )
                 }
+
                 else -> {}
             }
         }
@@ -259,7 +265,8 @@ fun StockItemCard(
     item: StockItem,
     quantity: Int,
     onAddItem: () -> Unit,
-    onRemoveItem: () -> Unit
+    onRemoveItem: () -> Unit,
+    isMaxQuantity: Boolean
 ) {
     Card(
         modifier = Modifier
@@ -316,16 +323,17 @@ fun StockItemCard(
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    // Botao de menos
                     if (quantity > 0) {
                         IconButton(
                             onClick = onRemoveItem,
                             modifier = Modifier
-                                .size(32.dp)
+                                .size(66.dp)
                                 .background(
                                     color = Color(0xFFFF0000),
-                                    shape = CircleShape
+                                    shape = RoundedCornerShape(62.dp)
                                 )
                         ) {
                             Icon(
@@ -335,19 +343,21 @@ fun StockItemCard(
                             )
                         }
                     }
+                    // Botao de add
                     IconButton(
                         onClick = onAddItem,
+                        enabled = !isMaxQuantity,
                         modifier = Modifier
-                            .size(32.dp)
+                            .size(66.dp)
                             .background(
-                                color = Color(0xFF00FF26),
-                                shape = CircleShape
+                                color = if (isMaxQuantity) Color(0xFFCCCCCC) else Color(0xFF00FF26),
+                                shape = RoundedCornerShape(62.dp)
                             )
                     ) {
                         Icon(
                             Icons.Default.Add,
                             contentDescription = "Add",
-                            tint = Color.White
+                            tint = if (isMaxQuantity) Color(0xFF666666) else Color(0xFFFFFFFF),
                         )
                     }
                 }

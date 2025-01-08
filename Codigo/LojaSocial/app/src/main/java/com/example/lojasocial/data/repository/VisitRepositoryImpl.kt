@@ -29,5 +29,10 @@ class VisitRepositoryImpl(private val api: FirebaseApi): VisitRepository {
 
     override suspend fun finalizeVisit(visitId: String): Result<Unit> {
         return api.finalizeVisit(visitId)
-    }}
+    }
+
+    override suspend fun getVisitById(visitId: String): Visit? {
+        return api.getVisitById(visitId)?.toVisit()
+    }
+}
 

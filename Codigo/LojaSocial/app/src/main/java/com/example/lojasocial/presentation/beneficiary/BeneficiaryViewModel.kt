@@ -145,15 +145,22 @@ class BeneficiaryViewModel(
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             try {
-                val newVisit = Visit(beneficiaryId = beneficiaryId)
-                val result = createVisitUseCase(newVisit)
-                result.onSuccess { visit ->
-                    _currentVisit.value = visit
+                val activeVisit = getActiveVisitsForBeneficiaryUseCase(beneficiaryId)
+                if (activeVisit != null) {
+                    _currentVisit.value = activeVisit
                     _uiState.value = UiState.Success
-                    Log.d("VisitViewModel", "New visit started: $visit")
-                }.onFailure { error ->
-                    _uiState.value = UiState.Error(error.message ?: "Failed to start visit")
-                    Log.e("VisitViewModel", "Error starting new visit: ${error.message}")
+                    Log.d("VisitViewModel", "Active visit found! Resuming active visit: $activeVisit")
+                } else {
+                    val newVisit = Visit(beneficiaryId = beneficiaryId)
+                    val result = createVisitUseCase(newVisit)
+                    result.onSuccess { visit ->
+                        _currentVisit.value = visit
+                        _uiState.value = UiState.Success
+                        Log.d("VisitViewModel", "New visit started: $visit")
+                    }.onFailure { error ->
+                        _uiState.value = UiState.Error(error.message ?: "Failed to start visit")
+                        Log.e("VisitViewModel", "Error starting new visit: ${error.message}")
+                    }
                 }
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Failed to start visit")

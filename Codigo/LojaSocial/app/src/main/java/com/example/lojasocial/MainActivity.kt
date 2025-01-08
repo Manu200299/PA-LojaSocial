@@ -31,6 +31,7 @@ import com.example.lojasocial.presentation.statistics.StatisticsScreen
 import com.example.lojasocial.presentation.stock.StockManagementScreen
 import com.example.lojasocial.presentation.stock.InventoryScreen
 import com.example.lojasocial.presentation.stock.AddNewItemScreen
+import com.example.lojasocial.presentation.visit.VisitStockSelectionScreen
 import com.example.lojasocial.presentation.volunteers.LoginVolunteerScreen
 import com.example.lojasocial.presentation.volunteers.RegisterVolunteerScreen
 import com.example.lojasocial.presentation.volunteers.VolunteersScreen
@@ -93,13 +94,34 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-               // CHECK-IN BENEFICIARIO
-                    composable("beneficiary_profile/{beneficiaryId}", arguments = listOf(navArgument("beneficiaryId") { type = NavType.StringType})
-                    ){ backStackEntry ->
+                    // BENEFICIARY PROFILE
+                    composable("beneficiary_profile/{beneficiaryId}", arguments = listOf(navArgument("beneficiaryId") { type = NavType.StringType})) { backStackEntry ->
                         val beneficiaryId = backStackEntry.arguments?.getString("beneficiaryId")
                         BeneficiaryProfileScreen(
                             beneficiaryId = beneficiaryId ?: "",
-                            sessionManager = sessionManager
+                            sessionManager = sessionManager,
+                            onStartVisitClick = {
+                                navController.navigate("visit_stock_selection/$beneficiaryId")
+                            },
+                            onEditClick = {}
+                        )
+                    }
+
+                    // VISIT STOCK SELECTION
+                    composable(
+                        "visit_stock_selection/{beneficiaryId}",
+                        arguments = listOf(navArgument("beneficiaryId") { type = NavType.StringType })
+                    ) { backStackEntry ->
+                        val beneficiaryId = backStackEntry.arguments?.getString("beneficiaryId") ?: ""
+                        VisitStockSelectionScreen(
+                            onNavigateToReview = {
+                                navController.navigate("visit_review")
+                            },
+                            onNavigateBack = {
+                                navController.popBackStack()
+                            },
+                            sessionManager = sessionManager,
+                            beneficiaryId = beneficiaryId
                         )
                     }
 
@@ -163,13 +185,13 @@ class MainActivity : ComponentActivity() {
                     }
 
                     // ESTATÍSTICAS
-                    composable("statistics") {
-                        val beneficiaryRepository = BeneficiaryRepositoryImpl() // Ajeita isso Manel
-                        StatisticsScreen(
-                            onNavigateBack = { navController.popBackStack() },
-                            beneficiaryRepository = beneficiaryRepository
-                        )
-                    }
+//                    composable("statistics") {
+//                        val beneficiaryRepository = BeneficiaryRepositoryImpl() // Ajeita isso Manel
+//                        StatisticsScreen(
+//                            onNavigateBack = { navController.popBackStack() },
+//                            beneficiaryRepository = beneficiaryRepository
+//                        )
+//                    }
 
                     // VOLUNTÁRIOS
                     composable("volunteers") {

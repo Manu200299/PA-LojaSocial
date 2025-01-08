@@ -191,7 +191,7 @@ class FirebaseApi(
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val donations = snapshot.children.mapNotNull { it.getValue(DonationDto::class.java) }
-                trySend(donations)
+                trySend(donations) // This should be inside onDataChange
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -203,6 +203,8 @@ class FirebaseApi(
             donationsRef.removeEventListener(listener)
         }
     }
+
+
 
     // READ: Get a donation by ID
     suspend fun getDonationById(donationId: String): DonationDto? {

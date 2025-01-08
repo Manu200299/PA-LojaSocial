@@ -30,6 +30,15 @@ class DonationViewModel: ViewModel() {
     // Error state to handle any errors
     private val _errorState = MutableStateFlow<String?>(null)
     val errorState: StateFlow<String?> = _errorState.asStateFlow()
+
+    // Loading state
+    private val _loadingState = MutableStateFlow(false)
+    val loadingState: StateFlow<Boolean> = _loadingState.asStateFlow()
+
+    // UI state to manage the states (Idle, Loading, Success, Error)
+    private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
+    val uiState = _uiState.asStateFlow()
+
     init {
         loadDonations()
     }
@@ -37,29 +46,43 @@ class DonationViewModel: ViewModel() {
     /**
      * Loads donations from Firebase and updates the state.
      */
-    private fun loadDonations() {
+     fun loadDonations() {
         viewModelScope.launch {
-            repository.getDonations()
-                .catch { e ->
-                    _errorState.value = e.message ?: "Error loading donations."
-                }
-                .collect { donations ->
-                    if (donations.isEmpty()) {
-                        _errorState.value = "No donations available."
-                    } else {
-                        _donationsState.value = donations
+            _uiState.value = UiState.Loading
+            _loadingState.value = true
+            try {
+                repository.getDonations()
+                    .catch { e ->
+                        _uiState.value = UiState.Error(e.message ?: "Error loading donations.")
+                        _errorState.value = e.message
                     }
-                }
+                    .collect { donations ->
+                        _loadingState.value = false
+                        if (donations.isEmpty()) {
+                            _uiState.value = UiState.NotFound
+                            _errorState.value = "No donations available."
+                        } else {
+                            _donationsState.value = donations
+                            _uiState.value = UiState.Success
+                        }
+                    }
+            } catch (e: Exception) {
+                _loadingState.value = false
+                _uiState.value = UiState.Error(e.message ?: "Error loading donations.")
+                _errorState.value = e.message
+            }
         }
     }
+
+
 
     /**
      * Adds a new donation to Firebase.
      */
     fun addNewDonation(donation: Donation) {
         viewModelScope.launch {
+            _loadingState.value = true
             val result = repository.addDonation(donation)
-            Log.d("VieModel", "Adding Donation: $donation")
             result.onFailure { e ->
                 _errorState.value = e.message ?: "Error adding donation."
                 Log.e("ViewModel", "Error adding donation: ${e.message}")
@@ -73,6 +96,7 @@ class DonationViewModel: ViewModel() {
      */
     fun updateDonation(donation: Donation) {
         viewModelScope.launch {
+            _loadingState.value = true
             val result = repository.updateDonation(donation)
             result.onFailure { e ->
                 _errorState.value = e.message ?: "Error updating donation."
@@ -86,6 +110,7 @@ class DonationViewModel: ViewModel() {
      */
     fun deleteDonation(donationId: String) {
         viewModelScope.launch {
+            _loadingState.value = true
             val result = repository.deleteDonation(donationId)
             result.onFailure { e ->
                 _errorState.value = e.message ?: "Error deleting donation."
@@ -93,7 +118,13 @@ class DonationViewModel: ViewModel() {
             loadDonations()  // Reload donations after deletion
         }
     }
-
+    sealed class UiState {
+        object Idle : UiState()
+        object Loading : UiState()
+        object Success : UiState()
+        object NotFound : UiState()
+        data class Error(val message: String) : UiState()
+    }
     // Factory pattern for ViewModel if you're using dependency injection
     class Factory : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")

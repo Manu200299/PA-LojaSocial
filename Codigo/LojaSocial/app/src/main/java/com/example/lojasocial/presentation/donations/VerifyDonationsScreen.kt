@@ -22,12 +22,13 @@ fun VerifyDonationsScreen(
     onNavigateBack: () -> Unit,
     viewModel: DonationViewModel = viewModel() // ViewModel should be passed or created here
 ) {
-
+    LaunchedEffect(Unit) {
+        viewModel.loadDonations()
+    }
     // Collect donations state from the ViewModel
     val donations by viewModel.donationsState.collectAsState()
     val errorMessage by viewModel.errorState.collectAsState()
 
-    println("Donations in screen: $donations")
     Scaffold(
         topBar = {
             TopAppBar(
@@ -86,7 +87,8 @@ fun VerifyDonationsScreen(
 
                     // Table Content
                     LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp), // Reduce spacing a bit
+                        modifier = Modifier.fillMaxSize()
                     ) {
                         items(donations) { donation ->
                             Row(
@@ -95,8 +97,9 @@ fun VerifyDonationsScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 TableCell(donation.donorName, Modifier.weight(1f))
-                                TableCell(donation.amount.toString(), Modifier.weight(1f))
-                                TableCell(donation.description ?: "", Modifier.weight(1f))
+                                TableCell(donation.phoneNumber, Modifier.weight(1f)) // Correct field
+                                TableCell(donation.donationType, Modifier.weight(1f)) // Correct field
+                                TableCell(donation.description ?: "", Modifier.weight(1f)) // Correct field
                                 TableCell(
                                     text = when (donation.donationType) {
                                         "Monetária" -> "${donation.amount}€"
@@ -137,3 +140,4 @@ private fun TableCell(
         style = MaterialTheme.typography.bodyMedium
     )
 }
+

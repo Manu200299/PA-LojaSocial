@@ -80,7 +80,7 @@ fun RegisterVolunteerScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Registrar Voluntário", color = Color.White) },
+                title = { Text("Registar Voluntário", color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Voltar", tint = Color.White)
@@ -94,7 +94,7 @@ fun RegisterVolunteerScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
+                .padding(6.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             //Logo
@@ -103,8 +103,8 @@ fun RegisterVolunteerScreen(
                     painter = rememberAsyncImagePainter(uri),
                     contentDescription = "Loja Social Logo",
                     modifier = Modifier
-                        .size(240.dp)
-                        .padding(vertical = 32.dp)
+                        .size(200.dp)
+                        .padding(vertical = 16.dp)
                 )
             }
 
@@ -150,10 +150,10 @@ fun RegisterVolunteerScreen(
                 enabled = uiState !is VolunteerViewModel.UiState.Loading,
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3851F1))
             ) {
-                Text("Registrar", color = Color.White)
+                Text("Registar", color = Color.White)
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(1.dp))
 
             TextButton(
                 onClick = onBackToLogin
@@ -181,107 +181,6 @@ fun RegisterVolunteerScreen(
             }
         }
     }
-
-//    Column(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .background(Color.White)
-//            .padding(16.dp),
-//        horizontalAlignment = Alignment.CenterHorizontally,
-//        verticalArrangement = Arrangement.spacedBy(24.dp)
-//    ) {
-
-//
-//        // Campos preenchimento
-//        OutlinedTextField(
-//            value = nome,
-//            onValueChange = { nome = it },
-//            label = { Text("Nome") },
-//            modifier = Modifier.fillMaxWidth(),
-//            colors = OutlinedTextFieldDefaults.colors(
-//                unfocusedContainerColor = Color(0xFFD9D9D9),
-//                focusedContainerColor = Color(0xFFD9D9D9),
-//                unfocusedBorderColor = Color.Transparent,
-//                focusedBorderColor = Color(0xFF3851F1)
-//            ),
-//            shape = RoundedCornerShape(8.dp),
-//            singleLine = true
-//        )
-//
-//        OutlinedTextField(
-//            value = telefone,
-//            onValueChange = { telefone = it },
-//            label = { Text("Número Telefone") },
-//            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-//            modifier = Modifier.fillMaxWidth(),
-//            colors = OutlinedTextFieldDefaults.colors(
-//                unfocusedContainerColor = Color(0xFFD9D9D9),
-//                focusedContainerColor = Color(0xFFD9D9D9),
-//                unfocusedBorderColor = Color.Transparent,
-//                focusedBorderColor = Color(0xFF3851F1)
-//            ),
-//            shape = RoundedCornerShape(8.dp),
-//            singleLine = true
-//        )
-//
-//        OutlinedTextField(
-//            value = password,
-//            onValueChange = { password = it },
-//            label = { Text("Palavra-Chave") },
-//            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-//            visualTransformation = PasswordVisualTransformation(),
-//            modifier = Modifier.fillMaxWidth(),
-//            colors = OutlinedTextFieldDefaults.colors(
-//                unfocusedContainerColor = Color(0xFFD9D9D9),
-//                focusedContainerColor = Color(0xFFD9D9D9),
-//                unfocusedBorderColor = Color.Transparent,
-//                focusedBorderColor = Color(0xFF3851F1)
-//            ),
-//            shape = RoundedCornerShape(8.dp),
-//            singleLine = true
-//        )
-//
-//        OutlinedTextField(
-//            value = confirmPassword,
-//            onValueChange = { password = it},
-//            label = { Text("Confirmar Palavra-Chave")},
-//            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-//            visualTransformation = PasswordVisualTransformation(),
-//            modifier = Modifier.fillMaxWidth(),
-//            colors = OutlinedTextFieldDefaults.colors(
-//                unfocusedContainerColor = Color(0xFFD9D9D9),
-//                focusedContainerColor = Color(0xFFD9D9D9),
-//                unfocusedBorderColor = Color.Transparent,
-//                focusedBorderColor = Color(0xFF3851F1)
-//            ),
-//            shape = RoundedCornerShape(8.dp),
-//            singleLine = true
-//        )
-//
-//        Spacer(modifier = Modifier.weight(1f))
-//
-//        // Botao Registar
-//        Button(
-//            onClick = {
-//                val addVolunteer = Volunteer(
-//                    nome = nome,
-//                    telefone = telefone,
-//                    password = password,
-//                )
-//                viewModel.registerVolunteer(addVolunteer)
-//            },
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .height(56.dp),
-//            shape = RoundedCornerShape(28.dp),
-//            enabled = uiState !is VolunteerViewModel.UiState.Loading,
-//            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3851F1))
-//        ) {
-//            Text("Registrar",
-//                style = MaterialTheme.typography.titleLarge,
-//                color = Color.White)
-//        }
-//    }
 }
 
 

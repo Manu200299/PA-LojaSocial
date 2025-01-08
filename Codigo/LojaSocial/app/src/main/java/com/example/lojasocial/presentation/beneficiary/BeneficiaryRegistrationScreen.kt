@@ -76,7 +76,7 @@ fun BeneficiaryRegistrationScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Registar Voluntário", color = Color.White) },
+                title = { Text("Registar Beneficiario", color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(

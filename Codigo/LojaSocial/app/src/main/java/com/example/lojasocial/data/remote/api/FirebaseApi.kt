@@ -4,6 +4,7 @@ import android.util.Log
 import com.example.lojasocial.data.remote.model.BeneficiaryDto
 import com.example.lojasocial.data.remote.model.DonationDto
 import com.example.lojasocial.data.remote.model.StockItemDto
+import com.example.lojasocial.data.remote.model.VisitDto
 import com.example.lojasocial.data.remote.model.VolunteerDto
 import com.example.lojasocial.data.remote.model.VolunteerLoginDto
 import com.google.firebase.auth.FirebaseAuth
@@ -26,7 +27,9 @@ class FirebaseApi(
     private val beneficiariesRef = database.getReference("Beneficiarios")
     private val volunteersRef = database.getReference("Voluntarios")
     private val stockRef = database.getReference("Stock")
-    private val donationsRef = database.getReference("Donations")
+    private val donationsRef = database.getReference("Donations") // mudar para portugues
+    private val visitsRef = database.getReference("Visitas")
+
 
 
     // Funcao para adicionar beneficiarios
@@ -233,6 +236,42 @@ class FirebaseApi(
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    // Funcao para criar visitas
+    suspend fun createVisit(visitDto: VisitDto): Result<VisitDto>{
+        return try {
+            val newVisitRef = visitsRef.push()
+            val visitWithId = visitDto.copy(id = newVisitRef.key ?: "")
+            newVisitRef.setValue(visitWithId).await()
+            Result.success(visitWithId)
+        } catch (e: Exception){
+            Result.failure(e)
+        }
+    }
+
+    // Funcao para atualizar visita
+    suspend fun updateVisit(visitDto: VisitDto): Result<Unit>{
+        return try {
+            visitsRef.child(visitDto.id).setValue(visitDto).await()
+            Result.success(Unit)
+        } catch (e: Exception){
+            Result.failure(e)
+        }
+    }
+
+    // Funcao para dar fetch as visitas pelo id do beneficiario
+    suspend fun getVisitsByBeneficiaryId(beneficiaryId: String): Flow<List<VisitDto>> = callbackFlow {
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val visits = snapshot.children.mapNotNull { it.getValue(VisitDto::class.java) }
+                trySend(visits)
+            } override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+            }
+        }
+        visitsRef.orderByChild("beneficiaryId").equalTo(beneficiaryId).addValueEventListener(listener)
+        awaitClose { visitsRef.removeEventListener(listener)}
     }
 
 }

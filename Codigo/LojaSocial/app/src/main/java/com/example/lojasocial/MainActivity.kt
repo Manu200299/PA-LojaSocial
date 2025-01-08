@@ -18,13 +18,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.lojasocial.data.local.SessionManager
-import com.example.lojasocial.data.remote.api.FirebaseApi
-import com.example.lojasocial.data.repository.DonationRepositoryImpl
-import com.example.lojasocial.domain.repository.DonationRepository
 import com.example.lojasocial.presentation.beneficiary.BeneficiaryProfileScreen
 import com.example.lojasocial.presentation.beneficiary.CheckInBeneficiaryScreen
 import com.example.lojasocial.presentation.beneficiary.CheckOutBeneficiaryScreen
-import com.example.lojasocial.presentation.donations.DonationViewModel
 import com.example.lojasocial.presentation.donations.NewDonationScreen
 import com.example.lojasocial.presentation.donations.ReceivingDonationsScreen
 
@@ -39,9 +35,7 @@ import com.example.lojasocial.presentation.volunteers.LoginVolunteerScreen
 import com.example.lojasocial.presentation.volunteers.RegisterVolunteerScreen
 import com.example.lojasocial.presentation.volunteers.VolunteersScreen
 import com.example.lojasocial.ui.theme.LojaSocialTheme
-import com.google.firebase.FirebaseApp
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.auth.FirebaseAuth
+
 class MainActivity : ComponentActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)

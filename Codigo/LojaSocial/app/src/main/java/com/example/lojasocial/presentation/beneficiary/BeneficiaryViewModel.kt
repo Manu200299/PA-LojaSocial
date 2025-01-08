@@ -8,12 +8,17 @@ import androidx.lifecycle.viewModelScope
 import com.example.lojasocial.data.local.SessionManager
 import com.example.lojasocial.data.remote.api.FirebaseApi
 import com.example.lojasocial.data.repository.BeneficiaryRepositoryImpl
+import com.example.lojasocial.data.repository.VisitRepositoryImpl
 import com.example.lojasocial.domain.model.Beneficiary
+import com.example.lojasocial.domain.model.Visit
 import com.example.lojasocial.domain.use_case.AddBeneficiaryUseCase
 import com.example.lojasocial.domain.use_case.BeneficiarySearchByIdNumberUseCase
 import com.example.lojasocial.domain.use_case.BeneficiarySearchByPhoneNumberUseCase
+import com.example.lojasocial.domain.use_case.CreateVisitUseCase
+import com.example.lojasocial.domain.use_case.GetActiveVisitsForBeneficiaryUseCase
 import com.example.lojasocial.domain.use_case.GetBeneficiariesUseCase
 import com.example.lojasocial.domain.use_case.GetBeneficiaryByIdUseCase
+import com.example.lojasocial.presentation.visit.VisitViewModel.UiState
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.snapshot.StringNode
@@ -31,12 +36,19 @@ class BeneficiaryViewModel(
     private val api = FirebaseApi(auth, database)
     private val repository = BeneficiaryRepositoryImpl(api)
 
+    // Repository for visit so it can start cvisit
+    private val visitRepository = VisitRepositoryImpl(api)
+
     // Use cases for BENEFICIARY
     private val getBeneficiariesUseCase = GetBeneficiariesUseCase(repository)
     private val addBeneficiaryUseCase = AddBeneficiaryUseCase(repository)
     private val searchByPhoneNumberUseCase = BeneficiarySearchByPhoneNumberUseCase(repository)
     private val searchByIdNumberUseCase = BeneficiarySearchByIdNumberUseCase(repository)
     private val getBeneficiaryByIdUseCase = GetBeneficiaryByIdUseCase(repository)
+
+    // Use cases for VISIT
+    private val createVisitUseCase = CreateVisitUseCase(visitRepository)
+    private val getActiveVisitsForBeneficiaryUseCase = GetActiveVisitsForBeneficiaryUseCase(visitRepository)
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
     val uiState = _uiState.asStateFlow()
@@ -52,6 +64,13 @@ class BeneficiaryViewModel(
 
     private val _selectedBeneficary = MutableStateFlow<Beneficiary?>(null)
     val selectedBeneficiary = _selectedBeneficary.asStateFlow()
+
+    // currentVisit
+    private val _currentVisit = MutableStateFlow<Visit?>(null)
+    val currentVisit: StateFlow<Visit?> = _currentVisit.asStateFlow()
+
+    private val _hasActiveVisit = MutableStateFlow(false)
+    val hasActiveVisit: StateFlow<Boolean> = _hasActiveVisit.asStateFlow()
 
     fun onSearchQueryChange(query: String) {
         _searchQuery.value = query
@@ -117,6 +136,40 @@ class BeneficiaryViewModel(
             } catch (e: Exception){
                 _uiState.value = UiState.Error(e.message ?: "Unkown Error")
                 Log.e("BeneficiaryViewModel", "Error loading beneficiary: ${e.message}")
+            }
+        }
+    }
+
+    // Funcao de checkin
+    fun startNewVisit(beneficiaryId: String){
+        viewModelScope.launch {
+            _uiState.value = UiState.Loading
+            try {
+                val newVisit = Visit(beneficiaryId = beneficiaryId)
+                val result = createVisitUseCase(newVisit)
+                result.onSuccess { visit ->
+                    _currentVisit.value = visit
+                    _uiState.value = UiState.Success
+                    Log.d("VisitViewModel", "New visit started: $visit")
+                }.onFailure { error ->
+                    _uiState.value = UiState.Error(error.message ?: "Failed to start visit")
+                    Log.e("VisitViewModel", "Error starting new visit: ${error.message}")
+                }
+            } catch (e: Exception) {
+                _uiState.value = UiState.Error(e.message ?: "Failed to start visit")
+                Log.e("VisitViewModel", "Error starting new visit: ${e.message}")
+            }
+        }
+    }
+
+    // Funcao para verificar se ha uma visita ativa para esse beneficiario
+    fun checkActiveVisit(beneficiaryId: String) {
+        viewModelScope.launch {
+            try {
+                val activeVisit = getActiveVisitsForBeneficiaryUseCase(beneficiaryId)
+                _hasActiveVisit.value = activeVisit != null
+            } catch (e: Exception) {
+                Log.e("BeneficiaryViewModel", "Error checking active visit: ${e.message}")
             }
         }
     }

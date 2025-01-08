@@ -1,7 +1,6 @@
 package com.example.lojasocial.domain.use_case
 
 import android.util.Log
-import androidx.compose.runtime.referentialEqualityPolicy
 import com.example.lojasocial.domain.model.Visit
 import com.example.lojasocial.domain.repository.VisitRepository
 import kotlinx.coroutines.flow.Flow
@@ -20,9 +19,25 @@ class UpdateVisitUseCase(private val repository: VisitRepository){
     }
 }
 
-class GetVisitsByBeneficiaryId(private val repository: VisitRepository) {
+class GetVisitsByBeneficiaryIdUseCase(private val repository: VisitRepository) {
     suspend operator fun invoke(beneficiaryId: String): Flow<List<Visit>>{
         Log.d("UseCase", "Fetching visits for beneficiaryId: $beneficiaryId ...")
         return repository.getVisitsByBeneficiaryId(beneficiaryId)
     }
 }
+
+class GetActiveVisitsForBeneficiaryUseCase(private val repository: VisitRepository) {
+    suspend operator fun invoke(beneficiaryId: String): Visit? {
+        Log.d("UseCase", "Fetching active visits for beneficiary $beneficiaryId ...")
+        return repository.getActiveVisitForBeneficiary(beneficiaryId)
+    }
+}
+
+class FinalizeVisitUseCase(private val repository: VisitRepository) {
+    suspend operator fun invoke(visitId: String): Result<Unit> {
+        Log.d("UseCase", "Finalizing visit $visitId ...")
+        return repository.finalizeVisit(visitId)
+    }
+}
+
+// FALTA REPLICAR USE CASES DO REPOSITORIO

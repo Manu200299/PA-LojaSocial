@@ -7,6 +7,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
+import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,6 +32,7 @@ import com.example.lojasocial.presentation.statistics.StatisticsDataScreen
 import com.example.lojasocial.presentation.stock.StockManagementScreen
 import com.example.lojasocial.presentation.stock.InventoryScreen
 import com.example.lojasocial.presentation.stock.AddNewItemScreen
+import com.example.lojasocial.presentation.visit.VisitStockSelectionScreen
 import com.example.lojasocial.presentation.volunteers.LoginVolunteerScreen
 import com.example.lojasocial.presentation.volunteers.RegisterVolunteerScreen
 import com.example.lojasocial.presentation.volunteers.VolunteersScreen
@@ -94,13 +96,39 @@ class MainActivity : ComponentActivity() {
                     }
 
                     // CHECK-IN BENEFICIARIO
-                    composable("beneficiary_profile/{beneficiaryId}", arguments = listOf(navArgument("beneficiaryId") { type = NavType.StringType})
-                    ){ backStackEntry ->
+                    composable("beneficiary_profile/{beneficiaryId}", arguments = listOf(navArgument("beneficiaryId") { type = NavType.StringType})) { backStackEntry ->
                         val beneficiaryId = backStackEntry.arguments?.getString("beneficiaryId")
                         BeneficiaryProfileScreen(
                             beneficiaryId = beneficiaryId ?: "",
-                            sessionManager = sessionManager
+                            sessionManager = sessionManager,
+                            onStartVisitClick = {
+                                navController.navigate("visit_stock_selection/$beneficiaryId")
+                            },
+                            onEditClick = {} // TODO
                         )
+                    }
+
+                    // VISIT STOCK SELECTION
+                    composable(
+                        "visit_stock_selection/{beneficiaryId}",
+                        arguments = listOf(navArgument("beneficiaryId") { type = NavType.StringType })
+                    ) { backStackEntry ->
+                        val beneficiaryId = backStackEntry.arguments?.getString("beneficiaryId") ?: ""
+                        VisitStockSelectionScreen(
+                            onNavigateToReview = {
+                                navController.navigate("visit_review")
+                            },
+                            sessionManager = sessionManager,
+                            onNavigateBack = {
+                                navController.popBackStack()
+                            },
+                            beneficiaryId = beneficiaryId
+                        )
+                    }
+
+                    // VISIT REVIEW (Antes do checkout)
+                    composable("visit_review") {
+                        Text("Visit Review Screen")
                     }
 
                     // CHECK-OUT BENEFICIÁRIO

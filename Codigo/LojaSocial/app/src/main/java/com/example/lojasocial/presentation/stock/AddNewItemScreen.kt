@@ -55,7 +55,7 @@ fun AddNewItemScreen(
     var initialQuantity by remember { mutableStateOf("0") }
     var isEssentialItem by remember { mutableStateOf(false) }
 
-    // Exemplo de categorias
+    // Exemplo de categorias (Temos de fazer funcionalidade para adicionar categorias)
     val categories = listOf("Roupa", "Alimentos", "Higiene", "Casa", "Outros")
 
     // Controla se o menu está aberto (expanded) ou fechado

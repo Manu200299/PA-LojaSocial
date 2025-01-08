@@ -7,8 +7,9 @@ data class Visit(
     val beneficiaryId: String,
     val startTime: Date = Date(),
     val endTime: Date? = null,
-    val items: List<VisitItem> = emptyList()
-)
+    val items: List<VisitItem> = emptyList(),
+    val isFinished: Boolean = false
+    )
 
 data class VisitItem(
     val stockItemId: String,

@@ -9,7 +9,8 @@ data class VisitDto(
     var beneficiaryId: String = "",
     var startTime: Long = 0,
     var endTime: Long? = null,
-    var items: List<VisitItemDto> = emptyList()
+    var items: List<VisitItemDto> = emptyList(),
+    var isFinished: Boolean = false
 ) {
     fun toVisit(): Visit {
         return Visit(
@@ -17,7 +18,8 @@ data class VisitDto(
             beneficiaryId = beneficiaryId,
             startTime = Date(startTime),
             endTime = endTime?.let { Date(it) },
-            items = items.map { it.toVisitItem() }
+            items = items.map { it.toVisitItem() },
+            isFinished = isFinished
         )
     }
 }
@@ -40,7 +42,8 @@ fun Visit.toVisitDto(): VisitDto {
         beneficiaryId = beneficiaryId,
         startTime = startTime.time,
         endTime = endTime?.time,
-        items = items.map { it.toVisitItemDto() }
+        items = items.map { it.toVisitItemDto() },
+        isFinished = isFinished
     )
 }
 

@@ -22,5 +22,12 @@ class VisitRepositoryImpl(private val api: FirebaseApi): VisitRepository {
             dtoList.map { it.toVisit() }
         }
     }
-}
+
+    override suspend fun getActiveVisitForBeneficiary(beneficiaryId: String): Visit? {
+        return api.getActiveVisitForBeneficiary(beneficiaryId)?.toVisit()
+    }
+
+    override suspend fun finalizeVisit(visitId: String): Result<Unit> {
+        return api.finalizeVisit(visitId)
+    }}
 

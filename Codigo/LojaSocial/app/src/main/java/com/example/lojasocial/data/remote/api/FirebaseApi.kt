@@ -274,4 +274,31 @@ class FirebaseApi(
         awaitClose { visitsRef.removeEventListener(listener)}
     }
 
+    // Funcao para ver se o beneficiario tem uma visita ativa
+    suspend fun getActiveVisitForBeneficiary(beneficiaryId: String): VisitDto? {
+        return try {
+            val snapshot = visitsRef
+                .orderByChild("beneficiaryId")
+                .equalTo(beneficiaryId)
+                .get()
+                .await()
+
+            snapshot.children
+                .mapNotNull { it.getValue(VisitDto::class.java) }
+                .firstOrNull { !it.isFinished && it.beneficiaryId == beneficiaryId }
+        } catch (e: Exception){
+            null
+        }
+    }
+
+    // Funcao para finalizar visita (checkout)
+    suspend fun finalizeVisit(visitId: String): Result<Unit>{
+        return try{
+            visitsRef.child(visitId).child("isFinished").setValue(true).await()
+            Result.success(Unit)
+        } catch (e:Exception){
+            Result.failure(e)
+        }
+    }
 }
+A

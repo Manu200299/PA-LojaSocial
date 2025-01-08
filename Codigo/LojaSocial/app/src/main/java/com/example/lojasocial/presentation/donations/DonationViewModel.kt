@@ -1,5 +1,6 @@
 package com.example.lojasocial.presentation.donations
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -58,8 +59,10 @@ class DonationViewModel: ViewModel() {
     fun addNewDonation(donation: Donation) {
         viewModelScope.launch {
             val result = repository.addDonation(donation)
+            Log.d("VieModel", "Adding Donation: $donation")
             result.onFailure { e ->
                 _errorState.value = e.message ?: "Error adding donation."
+                Log.e("ViewModel", "Error adding donation: ${e.message}")
             }
             loadDonations()  // Reload donations after adding
         }

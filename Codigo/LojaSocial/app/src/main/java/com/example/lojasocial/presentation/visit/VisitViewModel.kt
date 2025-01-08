@@ -1,6 +1,6 @@
 package com.example.lojasocial.presentation.visit
 
-import androidx.annotation.Size
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -8,14 +8,16 @@ import com.example.lojasocial.data.local.SessionManager
 import com.example.lojasocial.data.remote.api.FirebaseApi
 import com.example.lojasocial.data.repository.StockRepositoryImpl
 import com.example.lojasocial.data.repository.VisitRepositoryImpl
-import com.example.lojasocial.domain.model.Beneficiary
 import com.example.lojasocial.domain.model.StockItem
 import com.example.lojasocial.domain.model.Visit
 import com.example.lojasocial.domain.model.VisitItem
 import com.example.lojasocial.domain.use_case.CreateVisitUseCase
-import com.example.lojasocial.domain.use_case.GetVisitsByBeneficiaryId
+import com.example.lojasocial.domain.use_case.FinalizeVisitUseCase
+import com.example.lojasocial.domain.use_case.GetActiveVisitsForBeneficiaryUseCase
+import com.example.lojasocial.domain.use_case.GetStockCategoriesUseCase
+import com.example.lojasocial.domain.use_case.GetStockItemsUseCase
+import com.example.lojasocial.domain.use_case.GetVisitsByBeneficiaryIdUseCase
 import com.example.lojasocial.domain.use_case.UpdateVisitUseCase
-import com.example.lojasocial.presentation.beneficiary.BeneficiaryViewModel.UiState
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,7 +40,14 @@ class VisitViewModel(
     // Use cases for VISIT
     private val createVisitUseCase = CreateVisitUseCase(repository)
     private val updateVisitUseCase = UpdateVisitUseCase(repository)
-    private val getVisitsByBeneficiaryId = GetVisitsByBeneficiaryId(repository)
+    private val getVisitsByBeneficiaryIdUseCase = GetVisitsByBeneficiaryIdUseCase(repository)
+    private val getActiveVisitsForBeneficiaryUseCase = GetActiveVisitsForBeneficiaryUseCase(repository)
+    private val finalizeVisitUseCase = FinalizeVisitUseCase(repository)
+
+    // Use cases for STOCK
+    private val getStockItemUseCase = GetStockItemsUseCase(stockRepository)
+    private val getStockCategoriesUseCase = GetStockCategoriesUseCase(stockRepository)
+
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
     val uiState = _uiState.asStateFlow()
@@ -49,12 +58,48 @@ class VisitViewModel(
     private val _stockItems = MutableStateFlow<List<StockItem>>(emptyList())
     val stockItems: StateFlow<List<StockItem>> = _stockItems.asStateFlow()
 
+    private val _filteredStockItems = MutableStateFlow<List<StockItem>>(emptyList())
+    val filteredStockItems: StateFlow<List<StockItem>> = _filteredStockItems.asStateFlow()
+
+    private val _categories = MutableStateFlow<List<String>>(emptyList())
+    val categories: StateFlow<List<String>> = _categories.asStateFlow()
+
+    private val _selectedCategory = MutableStateFlow<String?>(null)
+    val selectedCategory: StateFlow<String?> = _selectedCategory.asStateFlow()
+
+    private var searchQuery: String = ""
+//    private var selectedCategory: String? = null
+
+    // Function para dar load aos items em stock sempre que o viewmodel e chamado
+    init {
+        loadStockItems()
+        loadCategories()
+    }
+
     fun loadStockItems(){
         viewModelScope.launch {
             _uiState.value = UiState.Loading
-            stockRepository.getStockItems().collect { items ->
-                _stockItems.value = items
-                _uiState.value = UiState.Success
+            try{
+                getStockItemUseCase().collect { items ->
+                    _stockItems.value = items
+                    applyFilters()
+                    _uiState.value = UiState.Success
+                }
+            } catch (e: Exception){
+                _uiState.value = UiState.Error(e.message ?: "Failed to load stock items")
+                Log.e("VisitViewModel", "Error loading stock items: ${e.message}")
+            }
+        }
+    }
+
+    private fun loadCategories(){
+        viewModelScope.launch {
+            try{
+                getStockCategoriesUseCase().collect { fetchedCategories ->
+                    _categories.value = fetchedCategories
+                }
+            } catch (e: Exception){
+                Log.e("VisitViewModel", "Error loading categories: ${e.message}")
             }
         }
     }
@@ -63,49 +108,116 @@ class VisitViewModel(
     fun startNewVisit(beneficiaryId: String){
         viewModelScope.launch {
             _uiState.value = UiState.Loading
-            val newList = Visit(beneficiaryId = beneficiaryId)
-            val result = repository.createVisit(newList)
-            result.onSuccess { visit ->
-                _currentVisit.value = visit
-                _uiState.value = UiState.Success
-            }.onFailure { error ->
-                _uiState.value = UiState.Error(error.message ?: "Failed to start visit")
+            try {
+                val activeVisit = getActiveVisitsForBeneficiaryUseCase(beneficiaryId)
+                if (activeVisit != null) {
+                    _currentVisit.value = activeVisit
+                    _uiState.value = UiState.Success
+                    Log.d("VisitViewModel", "Active visit found! Resuming active visit: $activeVisit")
+                } else {
+                    val newVisit = Visit(beneficiaryId = beneficiaryId)
+                    val result = createVisitUseCase(newVisit)
+                    result.onSuccess { visit ->
+                        _currentVisit.value = visit
+                        _uiState.value = UiState.Success
+                        Log.d("VisitViewModel", "New visit started: $visit")
+                    }.onFailure { error ->
+                        _uiState.value = UiState.Error(error.message ?: "Failed to start visit")
+                        Log.e("VisitViewModel", "Error starting new visit: ${error.message}")
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.value = UiState.Error(e.message ?: "Failed to start visit")
+                Log.e("VisitViewModel", "Error starting new visit: ${e.message}")
             }
         }
     }
 
+    // Funcao para verificar se ha uma visita ativa para esse beneficiario
+    fun checkActiveVisit(beneficiaryId: String) {
+        viewModelScope.launch {
+            _uiState.value = UiState.Loading
+            try{
+                val activeVisit = getActiveVisitsForBeneficiaryUseCase(beneficiaryId)
+                if (activeVisit != null) {
+                    _currentVisit.value = activeVisit
+                    _uiState.value = UiState.Success
+                    Log.d("VisitViewModel", "Active visit found: $activeVisit")
+                } else {
+                    startNewVisit(beneficiaryId)
+                }
+            } catch (e: Exception) {
+                _uiState.value = UiState.Error(e.message ?: "Failed to check active visit")
+                Log.e("VisitViewModel", "Error checking active visit: ${e.message}")
+            }
+        }
+    }
+
+    // Adiciona e remove tambem
     fun addItemToVisit(stockItemId: String, quantity: Int) {
         val currentVisit = _currentVisit.value ?: return
         val updatedItems = currentVisit.items.toMutableList()
         val existingItem = updatedItems.find { it.stockItemId == stockItemId }
         if (existingItem != null) {
-            updatedItems.remove(existingItem)
-            updatedItems.add(existingItem.copy(quantity = existingItem.quantity + quantity))
-        } else {
+            val newQuantity = existingItem.quantity + quantity
+            if (newQuantity > 0){
+                updatedItems.remove(existingItem)
+                updatedItems.add(existingItem.copy(quantity = newQuantity))
+            } else {
+                updatedItems.remove(existingItem)
+            }
+        } else if (quantity > 0){
             updatedItems.add(VisitItem(stockItemId, quantity))
         }
         _currentVisit.value = currentVisit.copy(items = updatedItems)
     }
 
     fun removeItemFromVisit(stockItemId: String) {
-        val currentVisit = _currentVisit.value ?: return
-        val updatedItems = currentVisit.items.filter { it.stockItemId != stockItemId }
-        _currentVisit.value = currentVisit.copy(items = updatedItems)
+        addItemToVisit(stockItemId, -1)
     }
 
     // Funcao de checkout
     fun finalizeVisit() {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
-            val currentVisit = _currentVisit.value ?: return@launch
-            val result = repository.updateVisit(currentVisit.copy(endTime = Date()))
-            result.onSuccess {
-                _uiState.value = UiState.Success
-                _currentVisit.value = null
-            }.onFailure { error ->
-                _uiState.value = UiState.Error(error.message ?: "Failed to finalize visit")
+            try {
+                val currentVisit = _currentVisit.value ?: throw IllegalStateException("No active visit")
+                val result = finalizeVisitUseCase(currentVisit.id)
+//                val result = updateVisitUseCase(currentVisit.copy(endTime = Date()))
+                result.onSuccess {
+                    _uiState.value = UiState.Success
+                    _currentVisit.value = null
+                    Log.d("VisitViewModel", "Visit finalized successfully")
+                }.onFailure { error ->
+                    _uiState.value = UiState.Error(error.message ?: "Failed to finalize visit")
+                    Log.e("VisitViewModel", "Error finalizing visit: ${error.message}")
+                 }
+            } catch (e: Exception) {
+                _uiState.value = UiState.Error(e.message ?: "Failed to finalize visit")
+                Log.e("VisitViewModel", "Error finalizing visit: ${e.message}")
             }
         }
+    }
+
+    fun updateSearchQuery(query: String) {
+        searchQuery = query
+        applyFilters()
+    }
+
+    fun updateSelectedCategory(category: String?) {
+        _selectedCategory.value = category
+        applyFilters()
+    }
+
+    fun performSearch(){
+        applyFilters()
+    }
+
+    private fun applyFilters() {
+        _filteredStockItems.value = _stockItems.value.filter { item ->
+            (searchQuery.isEmpty() || item.nome.contains(searchQuery, ignoreCase = true)) &&
+                    (_selectedCategory.value == null || item.categoria == _selectedCategory.value)
+        }.sortedBy { it.nome }
     }
 
     sealed class UiState {

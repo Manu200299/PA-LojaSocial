@@ -39,15 +39,17 @@ fun BeneficiaryProfileScreen(
         factory = BeneficiaryViewModel.Factory(sessionManager)
     ),
     onNavigateBack: () -> Unit = {},
-    onEditClick: (Beneficiary) -> Unit = {},
-    onStartVisitClick: (Beneficiary) -> Unit = {},
+    onEditClick: (Beneficiary) -> Unit,
+    onStartVisitClick: (Beneficiary) -> Unit,
 ) {
 
     val uiState by viewModel.uiState.collectAsState()
     val beneficiary by viewModel.selectedBeneficiary.collectAsState()
+    val hasActiveVisit by viewModel.hasActiveVisit.collectAsState()
 
     LaunchedEffect(beneficiaryId) {
         viewModel.getBeneficiarybyId(beneficiaryId)
+        viewModel.checkActiveVisit(beneficiaryId)
     }
 
     Column(
@@ -270,7 +272,14 @@ fun BeneficiaryProfileScreen(
                         Spacer(modifier = Modifier.weight(1f))
 
                         Button(
-                            onClick = { onStartVisitClick(beneficiaryData) },
+                            onClick = {
+                                if(hasActiveVisit) {
+                                    onStartVisitClick(beneficiaryData)
+                                } else {
+                                    viewModel.startNewVisit(beneficiaryData.id)
+                                    onStartVisitClick(beneficiaryData)
+                                }
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(56.dp),
@@ -280,7 +289,7 @@ fun BeneficiaryProfileScreen(
                             shape = RoundedCornerShape(28.dp)
                         ) {
                             Text(
-                                "Iniciar Visita",
+                                if (hasActiveVisit) "Continuar Visita" else "Iniciar Visita",
                                 style = MaterialTheme.typography.titleLarge.copy(
                                     color = Color.White
                                 )

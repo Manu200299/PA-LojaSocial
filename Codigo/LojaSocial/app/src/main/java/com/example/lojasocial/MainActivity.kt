@@ -7,7 +7,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,20 +18,19 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.lojasocial.data.local.SessionManager
+import com.example.lojasocial.data.repository.BeneficiaryRepositoryImpl
 import com.example.lojasocial.presentation.beneficiary.BeneficiaryProfileScreen
 import com.example.lojasocial.presentation.beneficiary.CheckInBeneficiaryScreen
 import com.example.lojasocial.presentation.beneficiary.CheckOutBeneficiaryScreen
 import com.example.lojasocial.presentation.donations.NewDonationScreen
 import com.example.lojasocial.presentation.donations.ReceivingDonationsScreen
-
 import com.example.lojasocial.presentation.home.ExitApplicationWithConfirmation
 import com.example.lojasocial.presentation.home.HomeScreen
 import com.example.lojasocial.presentation.language.LanguageScreen
-import com.example.lojasocial.presentation.statistics.StatisticsDataScreen
+import com.example.lojasocial.presentation.statistics.StatisticsScreen
 import com.example.lojasocial.presentation.stock.StockManagementScreen
 import com.example.lojasocial.presentation.stock.InventoryScreen
 import com.example.lojasocial.presentation.stock.AddNewItemScreen
-import com.example.lojasocial.presentation.visit.VisitStockSelectionScreen
 import com.example.lojasocial.presentation.volunteers.LoginVolunteerScreen
 import com.example.lojasocial.presentation.volunteers.RegisterVolunteerScreen
 import com.example.lojasocial.presentation.volunteers.VolunteersScreen
@@ -44,7 +42,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-       // FirebaseApp.initializeApp(this) // Initialize Firebase
+        // FirebaseApp.initializeApp(this) // Initialize Firebase
 
         setContent {
             LojaSocialTheme {
@@ -96,39 +94,13 @@ class MainActivity : ComponentActivity() {
                     }
 
                     // CHECK-IN BENEFICIARIO
-                    composable("beneficiary_profile/{beneficiaryId}", arguments = listOf(navArgument("beneficiaryId") { type = NavType.StringType})) { backStackEntry ->
+                    composable("beneficiary_profile/{beneficiaryId}", arguments = listOf(navArgument("beneficiaryId") { type = NavType.StringType})
+                    ){ backStackEntry ->
                         val beneficiaryId = backStackEntry.arguments?.getString("beneficiaryId")
                         BeneficiaryProfileScreen(
                             beneficiaryId = beneficiaryId ?: "",
-                            sessionManager = sessionManager,
-                            onStartVisitClick = {
-                                navController.navigate("visit_stock_selection/$beneficiaryId")
-                            },
-                            onEditClick = {} // TODO
+                            sessionManager = sessionManager
                         )
-                    }
-
-                    // VISIT STOCK SELECTION
-                    composable(
-                        "visit_stock_selection/{beneficiaryId}",
-                        arguments = listOf(navArgument("beneficiaryId") { type = NavType.StringType })
-                    ) { backStackEntry ->
-                        val beneficiaryId = backStackEntry.arguments?.getString("beneficiaryId") ?: ""
-                        VisitStockSelectionScreen(
-                            onNavigateToReview = {
-                                navController.navigate("visit_review")
-                            },
-                            sessionManager = sessionManager,
-                            onNavigateBack = {
-                                navController.popBackStack()
-                            },
-                            beneficiaryId = beneficiaryId
-                        )
-                    }
-
-                    // VISIT REVIEW (Antes do checkout)
-                    composable("visit_review") {
-                        Text("Visit Review Screen")
                     }
 
                     // CHECK-OUT BENEFICIÁRIO
@@ -177,7 +149,7 @@ class MainActivity : ComponentActivity() {
                             onNavigateBack = { navController.popBackStack() },
 
 
-                        )
+                            )
                     }
 
 
@@ -186,7 +158,7 @@ class MainActivity : ComponentActivity() {
                         VerifyDonationsScreen(
                             onNavigateBack = { navController.popBackStack() },
 
-                        )
+                            )
                     }
 
 
@@ -198,7 +170,11 @@ class MainActivity : ComponentActivity() {
 
                     // ESTATÍSTICAS
                     composable("statistics") {
-                        StatisticsDataScreen()
+                        val beneficiaryRepository = BeneficiaryRepositoryImpl() // Ajeita isso Manel
+                        StatisticsScreen(
+                            onNavigateBack = { navController.popBackStack() },
+                            beneficiaryRepository = beneficiaryRepository
+                        )
                     }
 
                     // IDIOMA

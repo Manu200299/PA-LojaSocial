@@ -15,12 +15,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.lojasocial.domain.model.Donation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewDonationScreen(
     onNavigateBack: () -> Unit,
-    onAddItem: (DonationItem) -> Unit
+    viewModel: DonationViewModel = viewModel(factory = DonationViewModel.Factory())
 ) {
     var name by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
@@ -29,7 +31,6 @@ fun NewDonationScreen(
     var isMonetaryDonation by remember { mutableStateOf(false) }
     var quantity by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
-
     val donationTypes = listOf("Roupa", "Alimentos", "Monetária", "Outros")
 
     Scaffold(
@@ -197,16 +198,15 @@ fun NewDonationScreen(
             // Add Item Button
             Button(
                 onClick = {
-                    onAddItem(
-                        DonationItem(
-                            name = name,
-                            phoneNumber = phoneNumber,
-                            type = selectedDonationType ?: "",
-                            description = description,
-                            isMonetary = isMonetaryDonation,
-                            quantity = quantity
-                        )
+                    val newDonation = Donation(
+                        donorName = name,
+                        phoneNumber = phoneNumber,
+                        donationType = selectedDonationType ?: "",
+                        description = description,
+                        amount = if (isMonetaryDonation) quantity.toDoubleOrNull() ?: 0.0 else 0.0, // Ensuring quantity is parsed to Double
                     )
+
+                    viewModel.addNewDonation(newDonation)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -231,11 +231,4 @@ fun NewDonationScreen(
     }
 }
 
-data class DonationItem(
-    val name: String,
-    val phoneNumber: String,
-    val type: String,
-    val description: String,
-    val isMonetary: Boolean,
-    val quantity: String
-)
+

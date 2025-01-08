@@ -2,6 +2,7 @@ package com.example.lojasocial.data.remote.api
 
 import android.util.Log
 import com.example.lojasocial.data.remote.model.BeneficiaryDto
+import com.example.lojasocial.data.remote.model.DonationDto
 import com.example.lojasocial.data.remote.model.StockItemDto
 import com.example.lojasocial.data.remote.model.VolunteerDto
 import com.example.lojasocial.data.remote.model.VolunteerLoginDto
@@ -25,6 +26,7 @@ class FirebaseApi(
     private val beneficiariesRef = database.getReference("Beneficiarios")
     private val volunteersRef = database.getReference("Voluntarios")
     private val stockRef = database.getReference("Stock")
+    private val donationsRef = database.getReference("Donations")
 
 
     // Funcao para adicionar beneficiarios
@@ -166,6 +168,71 @@ class FirebaseApi(
             Result.failure(e)
         }
     }
+    // CREATE: Add a new donation
+    suspend fun addDonation(donationDto: DonationDto): Result<Unit> {
+        return try {
+            val newDonationId = donationsRef.push().key
+                ?: return Result.failure(Exception("Failed to generate a donation ID."))
 
+            donationDto.donationId = newDonationId
+            donationsRef.child(newDonationId).setValue(donationDto).await()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // READ: Get all donations
+    suspend fun getDonations(): Flow<List<DonationDto>> = callbackFlow {
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val donations = snapshot.children.mapNotNull { it.getValue(DonationDto::class.java) }
+                trySend(donations)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+            }
+        }
+        donationsRef.addValueEventListener(listener)
+        awaitClose {
+            donationsRef.removeEventListener(listener)
+        }
+    }
+
+    // READ: Get a donation by ID
+    suspend fun getDonationById(donationId: String): DonationDto? {
+        return try {
+            val snapshot = donationsRef.child(donationId).get().await()
+            snapshot.getValue(DonationDto::class.java)
+        } catch (e: Exception) {
+            Log.e("FirebaseApi", "Error getting donation by ID: ${e.message}")
+            null
+        }
+    }
+
+    // UPDATE: Update a donation
+    suspend fun updateDonation(donationDto: DonationDto): Result<Unit> {
+        return try {
+            if (donationDto.donationId.isBlank()) {
+                return Result.failure(Exception("Donation ID is empty."))
+            }
+            donationsRef.child(donationDto.donationId).setValue(donationDto).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // DELETE: Delete a donation by ID
+    suspend fun deleteDonation(donationId: String): Result<Unit> {
+        return try {
+            donationsRef.child(donationId).removeValue().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
 }

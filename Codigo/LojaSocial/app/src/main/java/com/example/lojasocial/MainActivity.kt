@@ -93,7 +93,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    // CHECK-IN BENEFICIARIO
+               // CHECK-IN BENEFICIARIO
                     composable("beneficiary_profile/{beneficiaryId}", arguments = listOf(navArgument("beneficiaryId") { type = NavType.StringType})
                     ){ backStackEntry ->
                         val beneficiaryId = backStackEntry.arguments?.getString("beneficiaryId")
@@ -102,6 +102,7 @@ class MainActivity : ComponentActivity() {
                             sessionManager = sessionManager
                         )
                     }
+
 
                     // CHECK-OUT BENEFICIÁRIO
                     composable("check_out") {
@@ -161,13 +162,6 @@ class MainActivity : ComponentActivity() {
                             )
                     }
 
-
-
-                    // VOLUNTÁRIOS
-                    composable("volunteers") {
-                        VolunteersScreen()
-                    }
-
                     // ESTATÍSTICAS
                     composable("statistics") {
                         val beneficiaryRepository = BeneficiaryRepositoryImpl() // Ajeita isso Manel
@@ -177,10 +171,19 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    // IDIOMA
-                    composable("language") {
-                        LanguageScreen()
+                    // VOLUNTÁRIOS
+                    composable("volunteers") {
+                        VolunteersScreen()
                     }
+
+
+
+                    // IDIOMA
+                    composable("language_screen") {
+                        LanguageScreen(onNavigateBack = { navController.popBackStack() })
+                    }
+
+
 
                     // REGISTAR VOLUNTÁRIO
                     composable("volunteer_register") {

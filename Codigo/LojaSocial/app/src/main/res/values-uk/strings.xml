@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Соціальний магазин</string>
+    <string name="title_change_language">Змінити мову</string>
+    <string name="btn_select">Вибрати</string>
+    <string name="btn_selected">Вибрано</string>
+    <string name="button_select">Вибрано</string>
+    <string name="button_selected">Вибрано</string>
+    <string name="back">Назад</string>
+    <string name="language_portuguese">Португальська</string>
+    <string name="language_english">Англійська</string>
+    <string name="language_french">Французька</string>
+    <string name="language_spanish">Іспанська</string>
+    <string name="language_ukrainian">Українська</string>
+</resources>

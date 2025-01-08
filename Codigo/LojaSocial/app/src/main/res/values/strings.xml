@@ -1,3 +1,14 @@
 <resources>
-    <string name="app_name">LojaSocial</string>
+    <string name="app_name">Loja Social</string>
+    <string name="title_change_language">Alterar Idioma</string>
+    <string name="btn_select">Selecionar</string>
+    <string name="btn_selected">Selecionado</string>
+    <string name="button_selected">Selecionado</string>
+    <string name="button_select">Selecionado</string>
+    <string name="back">Voltar</string>
+    <string name="language_portuguese">Português</string>
+    <string name="language_english">Inglês</string>
+    <string name="language_french">Francês</string>
+    <string name="language_spanish">Espanhol</string>
+    <string name="language_ukrainian">Ucraniano</string>
 </resources>

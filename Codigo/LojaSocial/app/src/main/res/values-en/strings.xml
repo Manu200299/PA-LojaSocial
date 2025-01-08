@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Social Store</string>
+    <string name="title_change_language">Change Language</string>
+    <string name="btn_select">Select</string>
+    <string name="btn_selected">Selected</string>
+    <string name="button_select">Selected</string>
+    <string name="button_selected">Selected</string>
+    <string name="back">Back</string>
+    <string name="language_portuguese">Portuguese</string>
+    <string name="language_english">English</string>
+    <string name="language_french">French</string>
+    <string name="language_spanish">Spanish</string>
+    <string name="language_ukrainian">Ukrainian</string>
+</resources>

@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Magasin Social</string>
+    <string name="title_change_language">Changer de Langue</string>
+    <string name="btn_select">Sélectionner</string>
+    <string name="btn_selected">Sélectionné</string>
+    <string name="button_select">Sélectionné</string>
+    <string name="button_selected">Sélectionné</string>
+    <string name="back">Retour</string>
+    <string name="language_portuguese">Portugais</string>
+    <string name="language_english">Anglais</string>
+    <string name="language_french">Français</string>
+    <string name="language_spanish">Espagnol</string>
+    <string name="language_ukrainian">Ukrainien</string>
+</resources>

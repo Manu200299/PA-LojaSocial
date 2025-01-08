@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Tienda Social</string>
+    <string name="title_change_language">Cambiar Idioma</string>
+    <string name="btn_select">Seleccionar</string>
+    <string name="btn_selected">Seleccionado</string>
+    <string name="button_select">Seleccionado</string>
+    <string name="button_selected">Seleccionado</string>
+    <string name="back">Atrás</string>
+    <string name="language_portuguese">Portugués</string>
+    <string name="language_english">Inglés</string>
+    <string name="language_french">Francés</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_ukrainian">Ucraniano</string>
+</resources>

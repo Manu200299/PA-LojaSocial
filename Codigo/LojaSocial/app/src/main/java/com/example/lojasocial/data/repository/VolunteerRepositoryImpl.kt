@@ -60,9 +60,4 @@ class VolunteerRepositoryImpl(
     }
 
 
-
-    // TODO implementar no use case
-    suspend fun logout() {
-        sessionManager.clearSession()
-    }
 }

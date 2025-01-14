@@ -78,6 +78,13 @@ class VolunteerViewModel(
         }
     }
 
+    fun logout() {
+        viewModelScope.launch {
+            auth.signOut()
+            sessionManager.clearSession()
+        }
+    }
+
     fun getAllVolunteers() {
         viewModelScope.launch {
             _uiState.value = UiState.Loading

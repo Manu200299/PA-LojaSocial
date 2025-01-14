@@ -19,5 +19,6 @@ enum class MenuItem(
     LANGUAGE("Alterar Idioma", Icons.Outlined.Person, "language"),
     LOGIN_VOLUNTEER("Login Voluntário", Icons.Outlined.Person, "volunteer_login"), //
     REGISTER_VOLUNTEER("Registrar Voluntário", Icons.Outlined.Person, "volunteer_register"),
+    Logout("Log-out", Icons.Outlined.Close, "logout"),
     EXIT("Sair", Icons.Outlined.Close, "exit")
 }

@@ -7,11 +7,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
+import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -26,6 +28,7 @@ import com.example.lojasocial.presentation.donations.NewDonationScreen
 import com.example.lojasocial.presentation.donations.ReceivingDonationsScreen
 import com.example.lojasocial.presentation.home.ExitApplicationWithConfirmation
 import com.example.lojasocial.presentation.home.HomeScreen
+import com.example.lojasocial.presentation.home.LogoutConfirmationScreen
 import com.example.lojasocial.presentation.language.LanguageScreen
 import com.example.lojasocial.presentation.statistics.StatisticsScreen
 import com.example.lojasocial.presentation.stock.StockManagementScreen
@@ -34,6 +37,7 @@ import com.example.lojasocial.presentation.stock.AddNewItemScreen
 import com.example.lojasocial.presentation.visit.VisitStockSelectionScreen
 import com.example.lojasocial.presentation.volunteers.LoginVolunteerScreen
 import com.example.lojasocial.presentation.volunteers.RegisterVolunteerScreen
+import com.example.lojasocial.presentation.volunteers.VolunteerViewModel
 import com.example.lojasocial.presentation.volunteers.VolunteersScreen
 import com.example.lojasocial.ui.theme.LojaSocialTheme
 
@@ -225,6 +229,10 @@ class MainActivity : ComponentActivity() {
                     // LOGIN VOLUNTÁRIO
                     composable("volunteer_login") {
                         LoginVolunteerScreen(sessionManager = sessionManager)
+                    }
+
+                    composable("logout") {
+                        LogoutConfirmationScreen(navController, sessionManager)
                     }
 
                     // SAIR (com confirmação)

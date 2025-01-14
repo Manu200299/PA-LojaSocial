@@ -193,10 +193,15 @@ class MainActivity : ComponentActivity() {
 //                        )
 //                    }
 
-                    // VOLUNTÁRIOS
                     composable("volunteers") {
-                        VolunteersScreen()
+                        VolunteersScreen(
+                            sessionManager = sessionManager,
+                            onNavigateBack = {
+                                navController.popBackStack()
+                            }
+                        )
                     }
+
 
 
 

@@ -6,6 +6,8 @@ import com.example.lojasocial.data.remote.api.FirebaseApi
 import com.example.lojasocial.domain.model.Volunteer
 import com.example.lojasocial.domain.model.VolunteerLogin
 import com.example.lojasocial.domain.repository.VolunteerRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class VolunteerRepositoryImpl(
     private val api: FirebaseApi,
@@ -42,6 +44,22 @@ class VolunteerRepositoryImpl(
             Result.failure(e)
         }
     }
+
+    override suspend fun getAllVolunteers(): Flow<List<Volunteer>> {
+        return api.getAllVolunteers().map { dtoList ->
+            dtoList.map { it.toVolunteer() }
+        }
+    }
+
+    override suspend fun updateVolunteer(volunteer: Volunteer): Result<Unit> {
+        return api.updateVolunteer(volunteer.toVolunteerDto())
+    }
+
+    override suspend fun deleteVolunteer(volunteerId: String): Result<Unit> {
+        return api.deleteVolunteer(volunteerId)
+    }
+
+
 
     // TODO implementar no use case
     suspend fun logout() {

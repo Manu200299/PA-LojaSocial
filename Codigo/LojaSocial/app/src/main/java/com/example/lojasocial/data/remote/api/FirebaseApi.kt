@@ -114,6 +114,45 @@ class FirebaseApi(
         }
     }
 
+    suspend fun getAllVolunteers(): Flow<List<VolunteerDto>> = callbackFlow {
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val volunteers = snapshot.children.mapNotNull {
+                    it.getValue(VolunteerDto::class.java)
+                }
+                trySend(volunteers)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+            }
+        }
+        volunteersRef.addValueEventListener(listener)
+        awaitClose { volunteersRef.removeEventListener(listener) }
+    }
+
+    suspend fun updateVolunteer(volunteerDto: VolunteerDto): Result<Unit> {
+            return try {
+                if (volunteerDto.volunteerId.isBlank()) {
+                    return Result.failure(Exception("ID do voluntário vazio."))
+                }
+                volunteersRef.child(volunteerDto.volunteerId).setValue(volunteerDto).await()
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+    }
+
+    suspend fun deleteVolunteer(volunteerId: String): Result<Unit> {
+        return try {
+            volunteersRef.child(volunteerId).removeValue().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+
     // CREATE: adicionar um item ao stock
     suspend fun addStockItem(stockItemDto: StockItemDto): Result<Unit> {
         return try {

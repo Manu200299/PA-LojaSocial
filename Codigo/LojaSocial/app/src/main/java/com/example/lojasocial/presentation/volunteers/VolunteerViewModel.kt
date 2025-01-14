@@ -9,6 +9,9 @@ import com.example.lojasocial.data.remote.api.FirebaseApi
 import com.example.lojasocial.data.repository.VolunteerRepositoryImpl
 import com.example.lojasocial.domain.model.Volunteer
 import com.example.lojasocial.domain.model.VolunteerLogin
+import com.example.lojasocial.domain.use_case.DeleteVolunteerUseCase
+import com.example.lojasocial.domain.use_case.GetAllVolunteersUseCase
+import com.example.lojasocial.domain.use_case.UpdateVolunteerUseCase
 import com.example.lojasocial.domain.use_case.VolunteerLoginUseCase
 import com.example.lojasocial.domain.use_case.VolunteerRegisterUseCase
 import com.google.firebase.auth.FirebaseAuth
@@ -29,6 +32,12 @@ class VolunteerViewModel(
     // Use case para VOLUNTEER
     private val registerUseCase = VolunteerRegisterUseCase(repository)
     private val loginUseCase = VolunteerLoginUseCase(repository)
+    private val getAllVolunteersUseCase = GetAllVolunteersUseCase(repository)
+    private val updateVolunteerUseCase = UpdateVolunteerUseCase(repository)
+    private val deleteVolunteerUseCase = DeleteVolunteerUseCase(repository)
+
+    private val _volunteersListState = MutableStateFlow<List<Volunteer>>(emptyList())
+    val volunteersListState = _volunteersListState.asStateFlow()
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
     val uiState = _uiState.asStateFlow()
@@ -65,6 +74,58 @@ class VolunteerViewModel(
             } catch (e: Exception){
                 _uiState.value = UiState.Error(e.message ?: "Unkown error")
                 Log.e("VolunteerLoginViewModel", "Error logging in volunteer! | ${e.message}")
+            }
+        }
+    }
+
+    fun getAllVolunteers() {
+        viewModelScope.launch {
+            _uiState.value = UiState.Loading
+            try {
+                getAllVolunteersUseCase().collect { volunteers ->
+                    _volunteersListState.value = volunteers
+                    _uiState.value = UiState.Success
+                }
+            } catch (e: Exception) {
+                _uiState.value = UiState.Error(e.message ?: "Unknown error")
+            }
+        }
+    }
+
+    fun updateVolunteer(volunteer: Volunteer) {
+        viewModelScope.launch {
+            _uiState.value = UiState.Loading
+            try {
+                val result = updateVolunteerUseCase(volunteer)
+                result.fold(
+                    onSuccess = {
+                        _uiState.value = UiState.Success
+                    },
+                    onFailure = { error ->
+                        _uiState.value = UiState.Error(error.message ?: "Unknown error")
+                    }
+                )
+            } catch (e: Exception) {
+                _uiState.value = UiState.Error(e.message ?: "Unknown error")
+            }
+        }
+    }
+
+    fun deleteVolunteer(volunteerId: String) {
+        viewModelScope.launch {
+            _uiState.value = UiState.Loading
+            try {
+                val result = deleteVolunteerUseCase(volunteerId)
+                result.fold(
+                    onSuccess = {
+                        _uiState.value = UiState.Success
+                    },
+                    onFailure = { error ->
+                        _uiState.value = UiState.Error(error.message ?: "Unknown error")
+                    }
+                )
+            } catch (e: Exception) {
+                _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
         }
     }

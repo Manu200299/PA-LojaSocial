@@ -168,8 +168,7 @@ class FirebaseApi(
         }
     }
 
-    // READ: obter todos os itens em stock
-    // (usa Flow, tal como fazes com beneficiaries, volunteers, etc.)
+
     suspend fun getStockItems(): kotlinx.coroutines.flow.Flow<List<StockItemDto>> = callbackFlow {
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {

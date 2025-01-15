@@ -6,6 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.lojasocial.data.remote.api.FirebaseApi
 import com.example.lojasocial.data.repository.StockRepositoryImpl
 import com.example.lojasocial.domain.model.StockItem
+import com.example.lojasocial.domain.use_case.AddStockItemUseCase
+import com.example.lojasocial.domain.use_case.DeleteStockItemUseCase
+import com.example.lojasocial.domain.use_case.GetStockItemsUseCase
+import com.example.lojasocial.domain.use_case.UpdateStockItemUseCase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,11 +26,17 @@ class StockViewModel : ViewModel() {
 
     private val repository = StockRepositoryImpl(firebaseApi)
 
+    // Use cases
+    private val addStockItemUseCase = AddStockItemUseCase(repository)
+    private val getStockItemsUseCase = GetStockItemsUseCase(repository)
+    private val updateStockItemUseCase = UpdateStockItemUseCase(repository)
+    private val deleteStockItemUseCase = DeleteStockItemUseCase(repository)
+
     // Lista de items de stock observável pela UI
     private val _stockItemsState = MutableStateFlow<List<StockItem>>(emptyList())
     val stockItemsState: StateFlow<List<StockItem>> = _stockItemsState.asStateFlow()
 
-    // Mensagem de erro (caso aconteça alguma falha nas operações)
+    // Mensagem de erro
     private val _errorState = MutableStateFlow<String?>(null)
     val errorState: StateFlow<String?> = _errorState.asStateFlow()
 
@@ -39,7 +49,7 @@ class StockViewModel : ViewModel() {
      */
     private fun loadStockItems() {
         viewModelScope.launch {
-            repository.getStockItems()
+            getStockItemsUseCase()
                 .catch { e ->
                     _errorState.value = e.message
                 }
@@ -54,11 +64,11 @@ class StockViewModel : ViewModel() {
      */
     fun addNewItem(item: StockItem) {
         viewModelScope.launch {
-            val result = repository.addStockItem(item)
+            val result = addStockItemUseCase(item)
             result.onFailure { e ->
                 _errorState.value = e.message
             }
-            // Caso queiras voltar a carregar a lista de stock, podes chamar loadStockItems() aqui
+
         }
     }
 
@@ -67,7 +77,7 @@ class StockViewModel : ViewModel() {
      */
     fun updateItem(item: StockItem) {
         viewModelScope.launch {
-            val result = repository.updateStockItem(item)
+            val result = updateStockItemUseCase(item)
             result.onFailure { e ->
                 _errorState.value = e.message
             }
@@ -79,14 +89,14 @@ class StockViewModel : ViewModel() {
      */
     fun deleteItem(itemId: String) {
         viewModelScope.launch {
-            val result = repository.deleteStockItem(itemId)
+            val result = deleteStockItemUseCase(itemId)
             result.onFailure { e ->
                 _errorState.value = e.message
             }
         }
     }
 
-    // Caso precises de injecção de dependências, podes criar um Factory:
+
     class Factory : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -97,3 +107,4 @@ class StockViewModel : ViewModel() {
         }
     }
 }
+

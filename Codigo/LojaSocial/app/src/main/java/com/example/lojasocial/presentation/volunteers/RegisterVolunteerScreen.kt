@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -94,19 +95,22 @@ fun RegisterVolunteerScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .background(Color.White)
                 .padding(6.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            //Logo
-            logoUri?.let { uri ->
-                Image(
-                    painter = rememberAsyncImagePainter(uri),
-                    contentDescription = "Loja Social Logo",
-                    modifier = Modifier
-                        .size(200.dp)
-                        .padding(vertical = 16.dp)
-                )
-            }
+
+            // Imagem do Logo
+            Spacer(modifier = Modifier.height(16.dp))
+            Image(
+                painter = painterResource(id = R.drawable.logo_sao_lazaro ), // <-- Ajuste o nome do seu drawable
+                contentDescription = "Loja Social São Lázaro e São João do Souto Logo",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp),  // Ajuste conforme desejar
+                contentScale = ContentScale.Fit
+            )
+            Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
                 value = nome,

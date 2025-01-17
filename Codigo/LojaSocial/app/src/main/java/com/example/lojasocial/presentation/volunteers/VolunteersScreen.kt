@@ -1,5 +1,6 @@
 package com.example.lojasocial.presentation.volunteers
 
+import android.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -134,7 +135,9 @@ fun VolunteerRow(
             ) {
                 IconButton(
                     onClick = { showEditDialog = true }) {
-                    Icon(Icons.Default.Edit, contentDescription = "Editar")
+                    Icon(Icons.Default.Edit,
+                        contentDescription = "Editar",
+                        tint = Color.Blue)
                 }
 
                 IconButton(
@@ -142,7 +145,9 @@ fun VolunteerRow(
                         onDeleteClick(volunteer.volunteerId)
                     }
                 ) {
-                    Icon(Icons.Default.Delete, contentDescription = "Apagar")
+                    Icon(Icons.Default.Delete,
+                        contentDescription = "Apagar",
+                        tint = Color.Red)
                 }
             }
         }

@@ -72,7 +72,9 @@ class MainActivity : ComponentActivity() {
                         HomeScreen(
                             onMenuItemClick = { menuItem ->
                                 navController.navigate(menuItem.route)
-                            }
+                            },
+                            sessionManager = sessionManager,
+
                         )
                     }
 

@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -64,10 +65,23 @@ fun LoginVolunteerScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .background(Color.White)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Image(
+                painter = painterResource(id = R.drawable.logo_sao_lazaro ), // <-- Ajuste o nome do seu drawable
+                contentDescription = "Loja Social São Lázaro e São João do Souto Logo",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp),  // Ajuste conforme desejar
+                contentScale = ContentScale.Fit
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
             Text("Entre na sua conta de voluntário", style = MaterialTheme.typography.titleLarge)
 
             OutlinedTextField(
